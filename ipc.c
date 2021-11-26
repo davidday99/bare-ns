@@ -1,21 +1,20 @@
 #include "ipc.h"
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
 
-void send_data(char *pathname, uint8_t *data, uint32_t bytes) {
-    uint8_t fd = open(pathname, O_CREAT| O_RDWR | O_APPEND, 0777);
-    write(fd, &bytes, 4);
-    write(fd, data, bytes);
-    close(fd);
+void init_ipc(int fd[]) {
+    pipe(fd);
 }
 
-uint32_t recv_data(char *pathname, uint8_t *data) {
+void send_data(int8_t writepipe, uint8_t *data, uint32_t bytes) {
+    write(writepipe, &bytes, 4);
+    write(writepipe, data, bytes);
+}
+
+uint32_t recv_data(int8_t readpipe, uint8_t *data) {
     uint32_t len;
-
-    uint8_t fd = open(pathname, O_CREAT| O_RDONLY, 0777);
-
-    read(fd, &len, 4);
-    read(fd, data, len);
-
+    read(readpipe, &len, 4);
+    read(readpipe, data, len);
     return len;
 }
