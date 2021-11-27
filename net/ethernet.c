@@ -1,4 +1,5 @@
 #include "ethernet.h"
+#include "ip.h"
 
 #define RX_BUF_LEN 10
 #define TX_BUF_LEN 10
@@ -11,6 +12,18 @@ static uint8_t rxrdptr;
 
 static uint8_t txwrptr;
 static uint8_t txrdptr;
+
+void deliver_frame() {
+    struct enet_frame *e = read_rx_frame();
+    if (!e)
+        return;
+
+    switch (e->type) {
+        case ETYPE_IP:
+            write_rx_pkt(e);
+
+    }
+}
 
 uint8_t write_rx_frame(uint8_t *buf, uint16_t dlen) {
     uint16_t i = 0;
@@ -43,11 +56,12 @@ uint8_t write_rx_frame(uint8_t *buf, uint16_t dlen) {
 
 struct enet_frame *read_rx_frame() {
     struct enet_frame *ptr;
-    if (rxrdptr == rxwrptr)
+    if (rxrdptr == rxwrptr) {
         ptr = 0;
-    else
+    } else {
         ptr = &rx_buffer[rxrdptr];
         rxrdptr = (rxrdptr + 1) % RX_BUF_LEN;
+    }
 
     return ptr;
 }

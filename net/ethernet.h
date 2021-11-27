@@ -6,6 +6,8 @@
 #define ENET_RX_BUF_LEN 10
 #define ENET_TX_BUF_LEN 10
 
+#define ETYPE_IP 0x0800
+
 struct enet_frame {
     uint8_t dest[6];
     uint8_t src[6];
