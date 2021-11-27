@@ -3,8 +3,8 @@
 #define RX_BUF_LEN 10
 #define TX_BUF_LEN 10
 
-static struct enet_frame rx_buffer[RX_BUF_LEN];
-static struct enet_frame tx_buffer[TX_BUF_LEN];
+static struct enet_frame rx_buffer[ENET_RX_BUF_LEN];
+static struct enet_frame tx_buffer[ENET_TX_BUF_LEN];
 
 static uint8_t rxwrptr;
 static uint8_t rxrdptr;

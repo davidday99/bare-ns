@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#define RX_BUF_LEN 10
-#define TX_BUF_LEN 10
+#define ENET_RX_BUF_LEN 10
+#define ENET_TX_BUF_LEN 10
 
 struct enet_frame {
     uint8_t dest[6];
