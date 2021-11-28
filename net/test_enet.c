@@ -1,10 +1,9 @@
 #include "ethernet.h"
+#include "test_enet.h"
 #include <stdint.h>
 #include <stdio.h>
 
-void print_enet_frame(struct enet_frame *e);
-
-int main() {
+int test_enet() {
     struct enet_frame *e;
     uint8_t data1[] = {
         0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45,

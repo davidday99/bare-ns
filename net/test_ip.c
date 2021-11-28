@@ -1,10 +1,9 @@
 #include "ip.h"
+#include "test_ip.h"
 #include <stdint.h>
 #include <stdio.h>
 
-void print_ip_pkt(struct ip_pkt *p);
-
-int main() {
+int test_ip() {
     struct ip_pkt *p;
 
     uint8_t data1[] = {

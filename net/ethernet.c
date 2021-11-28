@@ -20,7 +20,7 @@ void deliver_frame() {
 
     switch (e->type) {
         case ETYPE_IP:
-            write_rx_pkt(e);
+            write_rx_pkt(e->data);
 
     }
 }

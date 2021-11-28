@@ -17,6 +17,7 @@ struct enet_frame {
     uint8_t fcs[4];
 };
 
+void deliver_frame();
 uint8_t write_rx_frame(uint8_t *buf, uint16_t dlen);
 struct enet_frame *read_rx_frame();
 
