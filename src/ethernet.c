@@ -1,9 +1,6 @@
 #include "ethernet.h"
 #include "ip.h"
 
-#define RX_BUF_LEN 10
-#define TX_BUF_LEN 10
-
 static struct enet_frame rx_buffer[ENET_RX_BUF_LEN];
 static struct enet_frame tx_buffer[ENET_TX_BUF_LEN];
 
@@ -48,7 +45,7 @@ uint8_t write_rx_frame(uint8_t *buf, uint16_t dlen) {
     for (int8_t j = 0; j < ENET_FCS_LEN; i++, j--)
         rx_buffer[rxwrptr].fcs[j] = buf[i];
 
-    rxwrptr = (rxwrptr + 1) % RX_BUF_LEN;
+    rxwrptr = (rxwrptr + 1) % ENET_RX_BUF_LEN;
 
     return 1;
 }
@@ -60,7 +57,7 @@ struct enet_frame *read_rx_frame() {
         ptr = 0;
     } else {
         ptr = &rx_buffer[rxrdptr];
-        rxrdptr = (rxrdptr + 1) % RX_BUF_LEN;
+        rxrdptr = (rxrdptr + 1) % ENET_RX_BUF_LEN;
     }
 
     return ptr;
