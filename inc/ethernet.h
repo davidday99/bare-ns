@@ -23,7 +23,8 @@ struct enet_frame {
 };
 
 void deliver_frame();
-uint8_t write_rx_frame(uint8_t *buf, uint16_t dlen);
+uint8_t write_rx_frame(struct enet_frame *e);
 struct enet_frame *read_rx_frame();
+void init_frame(struct enet_frame *e, uint8_t *buf, uint16_t dlen);
 
 #endif /* _ETHERNET_H_ */
