@@ -31,21 +31,21 @@ uint8_t write_rx_frame(uint8_t *buf, uint16_t dlen) {
     if (rxwrptr < rxrdptr)
         return 0;
     
-    for (int8_t j = 5; j >= 0; i++, j--)
+    for (int8_t j = 0; j < ENET_DEST_LEN; i++, j--)
         rx_buffer[rxwrptr].dest[j] = buf[i];
 
-    for (int8_t j = 5; j >= 0; i++, j--)
+    for (int8_t j = 0; j < ENET_SRC_LEN; i++, j--)
         rx_buffer[rxwrptr].src[j] = buf[i];
 
-    rx_buffer[rxwrptr].type = buf[i] | (buf[i + 1] << 8);
-    i += 2;
+    rx_buffer[rxwrptr].type = (buf[i] << 8) | buf[i + 1];
+    i += ENET_TYPE_LEN;
 
     for (uint16_t j = 0; j < dlen; i++, j++)
         rx_buffer[rxwrptr].data[j] = buf[i];
 
     rx_buffer[rxwrptr].dlen = dlen;
 
-    for (int8_t j = 3; j >= 0; i++, j--)
+    for (int8_t j = 0; j < ENET_FCS_LEN; i++, j--)
         rx_buffer[rxwrptr].fcs[j] = buf[i];
 
     rxwrptr = (rxwrptr + 1) % RX_BUF_LEN;

@@ -6,6 +6,11 @@
 #define ENET_RX_BUF_LEN 10
 #define ENET_TX_BUF_LEN 10
 
+#define ENET_SRC_LEN 6
+#define ENET_DEST_LEN 6
+#define ENET_TYPE_LEN 6
+#define ENET_FCS_LEN 4
+
 #define ETYPE_IP 0x0800
 
 struct enet_frame {
