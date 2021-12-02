@@ -31,12 +31,12 @@ int test_enet() {
 
 void print_enet_frame(struct enet_frame *e) {
     printf("Dest. MAC: ");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < ENET_DEST_LEN; i++) {
         printf("%X" "%s", e->dest[i], i == 5 ? "\n\n" : "-");
     }
 
     printf("Src. MAC: ");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < ENET_SRC_LEN; i++) {
         printf("%X" "%s", e->src[i], i == 5 ? "\n\n" : "-");
     }
 
@@ -51,7 +51,7 @@ void print_enet_frame(struct enet_frame *e) {
     printf("\n\n");
 
     printf("FCS: \n");
-    for (uint8_t i = 0; i < 4; i++) 
+    for (uint8_t i = 0; i < ENET_FCS_LEN; i++) 
         printf("0x%X\n", e->fcs[i]);
 
     printf("\n\n");
