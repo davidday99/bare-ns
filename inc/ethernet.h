@@ -12,6 +12,7 @@
 #define ENET_FCS_LEN 4
 
 #define ETYPE_IP 0x0800
+#define ETYPE_ARP 0x0806
 
 struct enet_frame {
     uint8_t dest[6];
