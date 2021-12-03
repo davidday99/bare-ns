@@ -29,20 +29,20 @@ uint8_t write_rx_frame(struct enet_frame *e) {
         return 0;
     
     for (int8_t j = 0; j < ENET_DEST_LEN; i++, j++)
-        rx_buffer[rxwrptr].dest[j] = e->dest[i];
+        enet_rx_buffer[rxwrptr].dest[j] = e->dest[i];
 
     for (int8_t j = 0; j < ENET_SRC_LEN; i++, j++)
-        rx_buffer[rxwrptr].src[j] = e->src[i];
+        enet_rx_buffer[rxwrptr].src[j] = e->src[i];
 
-    rx_buffer[rxwrptr].type = e->type;
+    enet_rx_buffer[rxwrptr].type = e->type;
 
     for (uint16_t j = 0; j < e->dlen; i++, j++)
-        rx_buffer[rxwrptr].data[j] = e->data[i];
+        enet_rx_buffer[rxwrptr].data[j] = e->data[i];
 
-    rx_buffer[rxwrptr].dlen = e->dlen;
+    enet_rx_buffer[rxwrptr].dlen = e->dlen;
 
     for (int8_t j = 0; j < ENET_FCS_LEN; i++, j++)
-        rx_buffer[rxwrptr].fcs[j] = e->fcs[i];
+        enet_rx_buffer[rxwrptr].fcs[j] = e->fcs[i];
 
     rxwrptr = (rxwrptr + 1) % ENET_RX_BUF_LEN;
 
@@ -55,7 +55,7 @@ struct enet_frame *read_rx_frame() {
     if (rxrdptr == rxwrptr) {
         ptr = 0;
     } else {
-        ptr = &rx_buffer[rxrdptr];
+        ptr = &enet_rx_buffer[rxrdptr];
         rxrdptr = (rxrdptr + 1) % ENET_RX_BUF_LEN;
     }
 

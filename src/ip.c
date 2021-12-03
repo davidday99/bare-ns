@@ -14,41 +14,41 @@ uint8_t write_rx_pkt(uint8_t *data) {
 
     uint16_t i = 0;
 
-    rx_buffer[rxwrptr].header1 = (data[i] << 24) |
+    ip_rx_buffer[rxwrptr].header1 = (data[i] << 24) |
                                     (data[i + 1] << 16) |
                                     (data[i + 2] << 8) |
                                     (data[i + 3]);
     i += 4;
-    rx_buffer[rxwrptr].header2 = (data[i] << 24) |
+    ip_rx_buffer[rxwrptr].header2 = (data[i] << 24) |
                                     (data[i + 1] << 16) |
                                     (data[i + 2] << 8) |
                                     (data[i + 3]);
     i += 4;
-    rx_buffer[rxwrptr].header3 = (data[i] << 24) |
+    ip_rx_buffer[rxwrptr].header3 = (data[i] << 24) |
                                     (data[i + 1] << 16) |
                                     (data[i + 2] << 8) |
                                     (data[i + 3]);
     i += 4;
-    rx_buffer[rxwrptr].src = (data[i] << 24) |
+    ip_rx_buffer[rxwrptr].src = (data[i] << 24) |
                                     (data[i + 1] << 16) |
                                     (data[i + 2] << 8) |
                                     (data[i + 3]);
     i += 4;
-    rx_buffer[rxwrptr].dest = (data[i] << 24) |
+    ip_rx_buffer[rxwrptr].dest = (data[i] << 24) |
                                     (data[i + 1] << 16) |
                                     (data[i + 2] << 8) |
                                     (data[i + 3]);
     i+= 4;
 
-    uint8_t olen = (rx_buffer[rxwrptr].header1 & 0xF000000) >> 24;
-    rx_buffer[rxwrptr].options = &data[i];
-    rx_buffer[rxwrptr].olen = olen - 5;
+    uint8_t olen = (ip_rx_buffer[rxwrptr].header1 & 0xF000000) >> 24;
+    ip_rx_buffer[rxwrptr].options = &data[i];
+    ip_rx_buffer[rxwrptr].olen = olen - 5;
     i += (olen - 5)*4;
 
-    uint16_t dlen = rx_buffer[rxwrptr].header1 & 0xFF;
+    uint16_t dlen = ip_rx_buffer[rxwrptr].header1 & 0xFF;
     dlen -= olen * 4;
-    rx_buffer[rxwrptr].data = &data[i];
-    rx_buffer[rxwrptr].dlen = dlen;
+    ip_rx_buffer[rxwrptr].data = &data[i];
+    ip_rx_buffer[rxwrptr].dlen = dlen;
 
     rxwrptr = (rxwrptr + 1) % IP_RX_BUF_LEN;
 
@@ -60,7 +60,7 @@ struct ip_pkt *read_rx_pkt() {
     if (rxrdptr == rxwrptr) {
         ptr = 0;
     } else {
-        ptr = &rx_buffer[rxrdptr];
+        ptr = &ip_rx_buffer[rxrdptr];
         rxrdptr = (rxrdptr + 1) % IP_RX_BUF_LEN;
     }
     return ptr;
