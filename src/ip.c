@@ -1,7 +1,7 @@
 #include "ip.h"
 
-static struct ip_pkt rx_buffer[IP_RX_BUF_LEN];
-static struct ip_pkt tx_buffer[IP_TX_BUF_LEN];
+static struct ip_pkt ip_rx_buffer[IP_RX_BUF_LEN];
+static struct ip_pkt ip_tx_buffer[IP_TX_BUF_LEN];
 
 static uint8_t rxrdptr;
 static uint8_t rxwrptr;
