@@ -10,18 +10,6 @@ static uint8_t rxrdptr;
 static uint8_t txwrptr;
 static uint8_t txrdptr;
 
-void deliver_frame() {
-    struct enet_frame *e = read_rx_frame();
-    if (!e)
-        return;
-
-    switch (e->type) {
-        case ETYPE_IP:
-            write_rx_pkt(e->data);
-
-    }
-}
-
 uint8_t write_rx_frame(struct enet_frame *e) {
     uint16_t i = 0;
 
@@ -49,6 +37,33 @@ uint8_t write_rx_frame(struct enet_frame *e) {
     return 1;
 }
 
+uint8_t write_tx_frame(struct enet_frame *e) {
+    uint16_t i = 0;
+
+    if (txwrptr < txrdptr)
+        return 0;
+    
+    for (int8_t j = 0; j < ENET_DEST_LEN; i++, j++)
+        enet_tx_buffer[txwrptr].dest[j] = e->dest[i];
+
+    for (int8_t j = 0; j < ENET_SRC_LEN; i++, j++)
+        enet_tx_buffer[txwrptr].src[j] = e->src[i];
+
+    enet_tx_buffer[txwrptr].type = e->type;
+
+    for (uint16_t j = 0; j < e->dlen; i++, j++)
+        enet_tx_buffer[txwrptr].data[j] = e->data[i];
+
+    enet_tx_buffer[txwrptr].dlen = e->dlen;
+
+    for (int8_t j = 0; j < ENET_FCS_LEN; i++, j++)
+        enet_tx_buffer[txwrptr].fcs[j] = e->fcs[i];
+
+    txwrptr = (txwrptr + 1) % ENET_TX_BUF_LEN;
+
+    return 1;
+}
+
 
 struct enet_frame *read_rx_frame() {
     struct enet_frame *ptr;
@@ -57,6 +72,18 @@ struct enet_frame *read_rx_frame() {
     } else {
         ptr = &enet_rx_buffer[rxrdptr];
         rxrdptr = (rxrdptr + 1) % ENET_RX_BUF_LEN;
+    }
+
+    return ptr;
+}
+
+struct enet_frame *read_tx_frame() {
+    struct enet_frame *ptr;
+    if (txrdptr == txwrptr) {
+        ptr = 0;
+    } else {
+        ptr = &enet_tx_buffer[txrdptr];
+        txrdptr = (txrdptr + 1) % ENET_TX_BUF_LEN;
     }
 
     return ptr;
