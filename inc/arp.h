@@ -22,6 +22,7 @@ struct arp_pkt {
 #define ARES_OP_REPLY 2
 #define ARES_HRD_ETHERNET 1
 
+void init_arp_pkt(struct arp_pkt *a, uint8_t *data);
 uint8_t write_rx_arp_pkt(struct arp_pkt *a);
 struct arp_pkt *read_rx_arp_pkt();
 
