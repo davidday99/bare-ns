@@ -19,7 +19,8 @@ struct ip_pkt {
     uint16_t dlen;
 };
 
-uint8_t write_rx_pkt(uint8_t *data);
-struct ip_pkt *read_rx_pkt();
+uint8_t write_rx_ip_pkt(struct ip_pkt *p);
+struct ip_pkt *read_rx_ip_pkt();
+void init_ip_pkt(struct ip_pkt *p, uint8_t *buf);
 
 #endif /* _IP_H_ */
