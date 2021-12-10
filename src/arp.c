@@ -46,7 +46,7 @@ uint8_t write_rx_arp_pkt(struct arp_pkt *a) {
 
     rxwrptr = (rxwrptr + 1) % ARP_RX_BUF_LEN;
     return 1;
-}
+}    uint8_t prev = 0;
 
 uint8_t write_tx_arp_pkt(struct arp_pkt *a) {
     uint16_t i = 0;
