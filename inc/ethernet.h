@@ -3,30 +3,27 @@
 
 #include <stdint.h>
 
-#define ENET_RX_BUF_LEN 10
-#define ENET_TX_BUF_LEN 10
+#define ENET_RX_BUF_LEN 1518
+#define ENET_TX_BUF_LEN 1518
 
-#define ENET_SRC_LEN 6
-#define ENET_DEST_LEN 6
-#define ENET_TYPE_LEN 6
-#define ENET_FCS_LEN 4
+#define ENET_HEADER_SIZE 14
+#define ENET_TYPE_OFFSET 12
+#define ENET_DATA_OFFSET 14
 
-#define ETYPE_IP 0x0800
-#define ETYPE_ARP 0x0806
+#define ETHERTYPE_IPV4 0x0800
+#define ETHERTYPE_ARP 0x0806
 
-struct enet_frame {
+struct enethdr {
     uint8_t dest[6];
     uint8_t src[6];
     uint16_t type;
-    uint16_t dlen;
-    uint8_t data[1500];
-    uint8_t fcs[4];
-};
+} __attribute__((packed));
 
-uint8_t write_rx_frame(struct enet_frame *e);
-uint8_t write_tx_frame(struct enet_frame *e);
-struct enet_frame *read_rx_frame();
-struct enet_frame *read_tx_frame();
-void init_frame(struct enet_frame *e, uint8_t *buf, uint16_t dlen);
+extern uint8_t enet_rx_waiting;
+extern uint8_t enet_tx_waiting;
+
+uint16_t ethernet_handle_frame(uint8_t *rx_buf);
+void ethernet_write_tx_buffer(struct enethdr *hdr, uint8_t *data, uint16_t len);
+void ethernet_read_tx_buffer(uint8_t *buf);
 
 #endif /* _ETHERNET_H_ */

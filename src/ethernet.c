@@ -1,110 +1,72 @@
+#include <stdint.h>
 #include "ethernet.h"
-#include "ip.h"
+#include "arp.h"
+#include "netcommon.h"
 
-static struct enet_frame enet_rx_buffer[ENET_RX_BUF_LEN];
-static struct enet_frame enet_tx_buffer[ENET_TX_BUF_LEN];
+static uint8_t enet_tx_buffer[ENET_TX_BUF_LEN];
+static uint16_t enet_tx_data_len;
 
-static uint8_t rxwrptr;
-static uint8_t rxrdptr;
+uint8_t enet_rx_waiting;
+uint8_t enet_tx_waiting;
 
-static uint8_t txwrptr;
-static uint8_t txrdptr;
+static void enet_handle_payload(uint8_t *buf, uint16_t etype);
+static void enet_deliver_ipv4();
+static void enet_handle_arp();
 
-uint8_t write_rx_frame(struct enet_frame *e) {
+uint16_t ethernet_handle_frame(uint8_t *rx_buf) {
+    enet_rx_waiting = 0;
+    uint16_t etype = hton16(((struct enethdr *) rx_buf)->type);
+    enet_handle_payload(rx_buf + ENET_DATA_OFFSET, etype);
+    return etype;
+}
+
+void ethernet_write_tx_buffer(struct enethdr *hdr, uint8_t *data, uint16_t len) {
     uint16_t i = 0;
-
-    if (rxwrptr < rxrdptr)
-        return 0;
+    for (; i < ENET_HEADER_SIZE; i++)
+        enet_tx_buffer[i] = ((uint8_t *) hdr)[i];
+    for (uint16_t j = 0; j < len; i++, j++)
+            enet_tx_buffer[i] = data[j];
     
-    for (int8_t j = 0; j < ENET_DEST_LEN; i++, j++)
-        enet_rx_buffer[rxwrptr].dest[j] = e->dest[i];
-
-    for (int8_t j = 0; j < ENET_SRC_LEN; i++, j++)
-        enet_rx_buffer[rxwrptr].src[j] = e->src[i];
-
-    enet_rx_buffer[rxwrptr].type = e->type;
-
-    for (uint16_t j = 0; j < e->dlen; i++, j++)
-        enet_rx_buffer[rxwrptr].data[j] = e->data[i];
-
-    enet_rx_buffer[rxwrptr].dlen = e->dlen;
-
-    for (int8_t j = 0; j < ENET_FCS_LEN; i++, j++)
-        enet_rx_buffer[rxwrptr].fcs[j] = e->fcs[i];
-
-    rxwrptr = (rxwrptr + 1) % ENET_RX_BUF_LEN;
-
-    return 1;
+    enet_tx_data_len = len + ENET_HEADER_SIZE;
+    enet_tx_waiting = 1;
 }
 
-uint8_t write_tx_frame(struct enet_frame *e) {
-    uint16_t i = 0;
+void ethernet_read_tx_buffer(uint8_t *buf) {
+    for (uint16_t i = 0; i < enet_tx_data_len; i++)
+        buf[i] = enet_tx_buffer[i];
 
-    if (txwrptr < txrdptr)
-        return 0;
-    
-    for (int8_t j = 0; j < ENET_DEST_LEN; i++, j++)
-        enet_tx_buffer[txwrptr].dest[j] = e->dest[i];
-
-    for (int8_t j = 0; j < ENET_SRC_LEN; i++, j++)
-        enet_tx_buffer[txwrptr].src[j] = e->src[i];
-
-    enet_tx_buffer[txwrptr].type = e->type;
-
-    for (uint16_t j = 0; j < e->dlen; i++, j++)
-        enet_tx_buffer[txwrptr].data[j] = e->data[i];
-
-    enet_tx_buffer[txwrptr].dlen = e->dlen;
-
-    for (int8_t j = 0; j < ENET_FCS_LEN; i++, j++)
-        enet_tx_buffer[txwrptr].fcs[j] = e->fcs[i];
-
-    txwrptr = (txwrptr + 1) % ENET_TX_BUF_LEN;
-
-    return 1;
+    enet_tx_data_len = 0;
+    enet_tx_waiting = 0;
 }
 
-
-struct enet_frame *read_rx_frame() {
-    struct enet_frame *ptr;
-    if (rxrdptr == rxwrptr) {
-        ptr = 0;
-    } else {
-        ptr = &enet_rx_buffer[rxrdptr];
-        rxrdptr = (rxrdptr + 1) % ENET_RX_BUF_LEN;
+static void enet_handle_payload(uint8_t *buf, uint16_t etype) {
+    switch (etype) {
+        case ETHERTYPE_IPV4:
+            enet_deliver_ipv4(buf);
+            break;
+        case ETHERTYPE_ARP:
+            enet_handle_arp(buf);
+            break;
+        default:
+            break;
     }
-
-    return ptr;
 }
 
-struct enet_frame *read_tx_frame() {
-    struct enet_frame *ptr;
-    if (txrdptr == txwrptr) {
-        ptr = 0;
-    } else {
-        ptr = &enet_tx_buffer[txrdptr];
-        txrdptr = (txrdptr + 1) % ENET_TX_BUF_LEN;
-    }
-
-    return ptr;
+static void enet_deliver_ipv4(uint8_t *buf) {
+    return;
 }
 
-void init_frame(struct enet_frame *e, uint8_t *buf, uint16_t dlen) {
-    uint16_t i = 0;
-    for (int8_t j = 0; j < ENET_DEST_LEN; i++, j++)
-        e->dest[j] = buf[i];
-
-    for (int8_t j = 0; j < ENET_SRC_LEN; i++, j++)
-        e->src[j] = buf[i];
-
-    e->type = (buf[i] << 8) | buf[i + 1];
-    i += ENET_TYPE_LEN;
-
-    for (uint16_t j = 0; j < dlen; i++, j++)
-        e->data[j] = buf[i];
-
-    e->dlen = dlen;
-
-    for (int8_t j = 0; j < ENET_FCS_LEN; i++, j++)
-        e->fcs[j] = buf[i];
+static void enet_handle_arp(uint8_t *buf) {
+    uint8_t mac[] = {0xA0, 0xCD, 0xEF, 0x12, 0x34, 0x56};
+    uint8_t arpbuf[26];
+    struct enethdr hdr;
+    hdr.type = hton16(ETHERTYPE_ARP);
+    uint16_t opcode = hton16(((struct arphdr *) buf)->opcode);
+    if (opcode == ARP_OP_REQUEST)
+        arp_reply(arpbuf, buf, (uint8_t []) {0xA0, 0xCD, 0xEF, 0x12, 0x34, 0x56});
+        for (uint8_t i = 0; i < 6; i++) {
+            hdr.src[i] = mac[i];
+            hdr.dest[i] = ((struct arphdr *) arpbuf)->hwtarget[i];
+        }
+        ethernet_write_tx_buffer(&hdr, arpbuf, ARP_SIZE);
 }

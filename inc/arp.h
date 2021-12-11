@@ -3,27 +3,23 @@
 
 #include <stdint.h>
 
-struct arp_pkt {
-    uint16_t hw_type;
-    uint16_t protocol_type;
+#define ARP_OP_REQUEST 1
+#define ARP_OP_REPLY 2
+#define ARP_SIZE 28
+
+struct arphdr {
+    uint16_t hwtype;
+    uint16_t ptype;
     uint8_t hwlen;
     uint8_t plen;
     uint16_t opcode;
-    uint8_t *hwaddr_sender;
-    uint8_t *paddr_sender;
-    uint8_t *hwaddr_target;
-    uint8_t *paddr_target;
+    uint32_t psender;
+    uint8_t hwsender[6];
+    uint32_t ptarget;
+    uint8_t hwtarget[6];
 } __attribute__((packed));
 
-#define ARP_RX_BUF_LEN 10
-#define ARP_TX_BUF_LEN 10
-
-#define ARES_OP_REQUEST 1
-#define ARES_OP_REPLY 2
-#define ARES_HRD_ETHERNET 1
-
-void init_arp_pkt(struct arp_pkt *a, uint8_t *data);
-uint8_t write_rx_arp_pkt(struct arp_pkt *a);
-struct arp_pkt *read_rx_arp_pkt();
+void arp_request(uint8_t *buf, uint8_t *arppkt);
+void arp_reply(uint8_t *buf, uint8_t *arppkt, uint8_t *sender_mac);
 
 #endif /* _ARP_H_ */

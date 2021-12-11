@@ -15,7 +15,7 @@ CC = gcc
 DEBUGGER = gdb
 RM      = rm -rf
 MKDIR   = @mkdir -p $(@D) #creates folders if not present
-CFLAGS = -I$(INC) -g
+CFLAGS = -I$(INC) -g3
 
 $(info $(TEST_OBJS))
 
@@ -34,7 +34,7 @@ $(ODIR)/$(PROJECT).bin: $(OBJS)
 
 $(OBJ)/%.o: $(TEST)/%.c
 	$(MKDIR)
-	$(CC) -o $@ $^ -c $(CFLAGS) -I$(TEST_INC)
+	$(CC) -o $@ $^ -c $(CFLAGS) -I$(TEST_INC) -I$(INC)
 
 $(ODIR)/$(TEST)/test_runner: $(TEST_OBJS) $(filter-out $(OBJ)/main.o, $(OBJS))
 	$(MKDIR)
