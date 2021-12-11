@@ -13,10 +13,10 @@ struct arphdr {
     uint8_t hwlen;
     uint8_t plen;
     uint16_t opcode;
-    uint32_t psender;
     uint8_t hwsender[6];
-    uint32_t ptarget;
+    uint32_t psender;
     uint8_t hwtarget[6];
+    uint32_t ptarget;
 } __attribute__((packed));
 
 void arp_request(uint8_t *buf, uint8_t *arppkt);
