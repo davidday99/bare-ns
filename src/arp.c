@@ -1,11 +1,13 @@
 #include <stdint.h>
 #include "arp.h"
 #include "netcommon.h"
+#include "stdlib.h"
 
-static void arp_memcpy(uint8_t *dest, uint8_t *src, uint32_t bytes) {
-    for (uint32_t i = 0; i < bytes; i++)
-        *dest++ = *src++;
-}
+#define ARP_HW_TYPE_ENET 0x0001
+#define ARP_PTYPE_IPV4 0x0800
+
+#define ARP_HW_ENET_LEN 6
+#define ARP_P_IPV4_LEN 4
 
 static int32_t arp_memcmp(uint8_t *arr1, uint8_t *arr2, uint32_t bytes) {
     for (uint32_t i = 0; i < bytes; i++)
@@ -15,32 +17,26 @@ static int32_t arp_memcmp(uint8_t *arr1, uint8_t *arr2, uint32_t bytes) {
     return 0;
 }
 
-void arp_request(uint8_t *buf, uint8_t *arppkt) {
-    struct arphdr *hdr = (struct arphdr *) arppkt;
-    struct arphdr *request = (struct arphdr *) buf;
-
-    request->hwtype = hdr->hwtype;
-    request->ptype = hdr->ptype;
-    request->hwlen = hdr->hwlen;
-    request->plen = hdr->plen;
-    request->opcode = hton16(1);
-    request->psender = hdr->psender;
-    request->ptarget = hdr->ptarget;
-    arp_memcpy(request->hwsender, hdr->hwsender, 6);
-    arp_memcpy(request->hwtarget, hdr->hwtarget, 6);
+void arp_request(struct arphdr *request, uint8_t *hwsender, uint32_t psender,
+                uint8_t *hwtarget, uint32_t ptarget) {
+    request->hwtype = hton16(ARP_HW_TYPE_ENET);
+    request->ptype = hton16(ARP_PTYPE_IPV4);
+    request->hwlen = ARP_HW_ENET_LEN;
+    request->plen = ARP_P_IPV4_LEN;
+    request->opcode = hton16(ARP_OP_REQUEST);
+    request->psender = hton32(psender);
+    request->ptarget = hton32(ptarget);
+    memcopy(request->hwsender, hwsender, 6);
+    memcopy(request->hwtarget, hwtarget, 6);
 }
 
-void arp_reply(uint8_t *buf, uint8_t *arppkt, uint8_t *sender_mac) {
-    struct arphdr *hdr = (struct arphdr *) arppkt;
-    struct arphdr *reply = (struct arphdr *) buf;
-
-    reply->hwtype = hdr->hwtype;
-    reply->ptype = hdr->ptype;
-    reply->hwlen = hdr->hwlen;
-    reply->plen = hdr->plen;
-    reply->opcode = hton16(2);
-    reply->psender = hdr->ptarget;
-    reply->ptarget = hdr->psender;
-    arp_memcpy(reply->hwsender, sender_mac, 6);
-    arp_memcpy(reply->hwtarget, hdr->hwsender, 6);
+void arp_reply(struct arphdr *reply, struct arphdr *request) {
+    reply->hwtype = request->hwtype;
+    reply->ptype = request->ptype;
+    reply->hwlen = request->hwlen;
+    reply->plen = request->plen;
+    reply->opcode = hton16(ARP_OP_REPLY);
+    reply->psender = request->ptarget;
+    reply->ptarget = request->psender;
+    memcopy(reply->hwtarget, request->hwsender, 6);
 }

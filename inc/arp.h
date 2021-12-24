@@ -19,7 +19,7 @@ struct arphdr {
     uint32_t ptarget;
 } __attribute__((packed));
 
-void arp_request(uint8_t *buf, uint8_t *arppkt);
-void arp_reply(uint8_t *buf, uint8_t *arppkt, uint8_t *sender_mac);
-
+void arp_request(struct arphdr *request, uint8_t *hwsender, uint32_t psender,
+                uint8_t *hwtarget, uint32_t ptarget);
+void arp_reply(struct arphdr *reply, struct arphdr *request);
 #endif /* _ARP_H_ */

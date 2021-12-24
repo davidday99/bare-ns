@@ -18,6 +18,7 @@
 
 #define ETHERTYPE_IPV4 0x0800
 #define ETHERTYPE_ARP 0x0806
+#define ETHERTYPE_IPV6 0x86DD
 
 struct enethdr {
     uint8_t dest[6];
@@ -28,7 +29,6 @@ struct enethdr {
 extern uint8_t enet_rx_waiting;
 extern uint8_t enet_tx_waiting;
 
-uint16_t ethernet_handle_frame(uint8_t *rx_buf);
 void ethernet_write_tx_buffer(struct enethdr *hdr, uint8_t *data, uint16_t len);
 void ethernet_read_tx_buffer(uint8_t *buf);
 
