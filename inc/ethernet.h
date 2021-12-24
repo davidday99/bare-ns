@@ -26,10 +26,4 @@ struct enethdr {
     uint16_t type;
 } __attribute__((packed));
 
-extern uint8_t enet_rx_waiting;
-extern uint8_t enet_tx_waiting;
-
-void ethernet_write_tx_buffer(struct enethdr *hdr, uint8_t *data, uint16_t len);
-void ethernet_read_tx_buffer(uint8_t *buf);
-
 #endif /* _ETHERNET_H_ */
