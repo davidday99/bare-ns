@@ -1,6 +1,6 @@
 #include "ethernet.h"
-#include "stub_enc.h"
 #include "netcommon.h"
+#include "string.h"
 
 static uint8_t enet_frame[] = {
     0xFF,
@@ -14,7 +14,7 @@ static uint8_t enet_frame[] = {
     0xEF,
     0x12,
     0x34,
-    0x56,  // src MAC, 0xABCDEF12
+    0x56,  // src MAC, 0xABCDEF123456
     0x08,
     0x06,  // type 0x0806 (ARP)
     0xCC,
@@ -32,59 +32,30 @@ int test_networking_macros() {
     return success;
 }
 
-int test_receive_ethernet_frame() {
-    stub_enc_read(enet_frame, sizeof(enet_frame));
-    enet_rx_waiting = 1;
-    uint16_t res = 0;
-    return res == ETHERTYPE_ARP;
+int test_read_enet_dest() {
+    struct enethdr *hdr = (struct enethdr *) enet_frame;
+    uint8_t expected[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    return memcmp(hdr->dest, expected, 6) == 0;
 }
 
-int test_write_ethernet_frame_to_tx_buffer() {
-    uint8_t data[14] = {
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-    };
-
-    struct enethdr hdr;
-
-    uint8_t res[sizeof(data) + sizeof(hdr)];
-
-    ethernet_write_tx_buffer(&hdr, data, sizeof(data));
-    ethernet_read_tx_buffer(res);
-
-    for (int i = 0; i < sizeof(data); i++)
-        if (res[i + sizeof(hdr)] != data[i])
-            return 0;
-    return 1;
+int test_read_enet_src() {
+    struct enethdr *hdr = (struct enethdr *) enet_frame;
+    uint8_t expected[] = {0xAB, 0xCD, 0xEF, 0x12, 0x34, 0x56};
+    return memcmp(hdr->src, expected, 6) == 0;
 }
 
-int test_enc_to_ethernet() {
-    int pktcnt = 1;
-
-    if (pktcnt > 0) {
-        stub_enc_read(enet_frame, sizeof(enet_frame));
-        enet_rx_waiting = 1;
-    }
-    return 1;
+int test_read_enet_type() {
+    struct enethdr *hdr = (struct enethdr *) enet_frame;
+    uint16_t expected = 0x0806;
+    return hton16(hdr->type) == expected;
 }
 
 int test_ethernet() {
     int success = 1;
     success &= test_networking_macros();
-    success &= test_receive_ethernet_frame();
-    success &= test_write_ethernet_frame_to_tx_buffer();
-    success &= test_enc_to_ethernet();
+    success &= test_read_enet_dest();
+    success &= test_read_enet_src();
+    success &= test_read_enet_type();
+
     return success;
 }
