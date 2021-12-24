@@ -36,10 +36,6 @@ int test_receive_ethernet_frame() {
     stub_enc_read(enet_frame, sizeof(enet_frame));
     enet_rx_waiting = 1;
     uint16_t res = 0;
-
-    if (enet_rx_waiting) {
-        res = ethernet_handle_frame(stub_enc_rx_buffer);
-    }
     return res == ETHERTYPE_ARP;
 }
 
@@ -80,10 +76,6 @@ int test_enc_to_ethernet() {
     if (pktcnt > 0) {
         stub_enc_read(enet_frame, sizeof(enet_frame));
         enet_rx_waiting = 1;
-    }
-
-    if (enet_rx_waiting) {
-        ethernet_handle_frame(stub_enc_rx_buffer);
     }
     return 1;
 }

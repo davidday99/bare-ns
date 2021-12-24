@@ -60,10 +60,6 @@ int test_receive_arp_pkt() {
         stub_enc_read(enet_frame_arppkt, sizeof(enet_frame_arppkt));
         enet_rx_waiting = 1;
     }
-
-    if (enet_rx_waiting) {
-        ethernet_handle_frame(stub_enc_rx_buffer);
-    }
     
     return 1;
 }
