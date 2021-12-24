@@ -21,5 +21,7 @@ struct arphdr {
 
 void arp_request(struct arphdr *request, uint8_t *hwsender, uint32_t psender,
                 uint8_t *hwtarget, uint32_t ptarget);
-void arp_reply(struct arphdr *reply, struct arphdr *request);
+void arp_reply(struct arphdr *reply, uint8_t *hwsender, uint32_t psender,
+                uint8_t *hwtarget, uint32_t ptarget);
+                    
 #endif /* _ARP_H_ */

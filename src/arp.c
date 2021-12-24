@@ -31,13 +31,15 @@ void arp_request(struct arphdr *request, uint8_t *hwsender, uint32_t psender,
     memcpy(request->hwtarget, hwtarget, 6);
 }
 
-void arp_reply(struct arphdr *reply, struct arphdr *request) {
-    reply->hwtype = request->hwtype;
-    reply->ptype = request->ptype;
-    reply->hwlen = request->hwlen;
-    reply->plen = request->plen;
+void arp_reply(struct arphdr *reply, uint8_t *hwsender, uint32_t psender,
+                uint8_t *hwtarget, uint32_t ptarget) {
+    reply->hwtype = hton16(ARP_HW_TYPE_ENET);
+    reply->ptype = hton16(ARP_PTYPE_IPV4);
+    reply->hwlen = ARP_HW_ENET_LEN;
+    reply->plen = ARP_P_IPV4_LEN;
     reply->opcode = hton16(ARP_OP_REPLY);
-    reply->psender = request->ptarget;
-    reply->ptarget = request->psender;
-    memcpy(reply->hwtarget, request->hwsender, 6);
+    reply->psender = hton32(psender);
+    reply->ptarget = hton32(ptarget);
+    memcpy(reply->hwsender, hwsender, 6);
+    memcpy(reply->hwtarget, hwtarget, 6);
 }
