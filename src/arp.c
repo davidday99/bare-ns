@@ -2,6 +2,7 @@
 #include "arp.h"
 #include "netcommon.h"
 #include "stdlib.h"
+#include "string.h"
 
 #define ARP_HW_TYPE_ENET 0x0001
 #define ARP_PTYPE_IPV4 0x0800
@@ -26,8 +27,8 @@ void arp_request(struct arphdr *request, uint8_t *hwsender, uint32_t psender,
     request->opcode = hton16(ARP_OP_REQUEST);
     request->psender = hton32(psender);
     request->ptarget = hton32(ptarget);
-    memcopy(request->hwsender, hwsender, 6);
-    memcopy(request->hwtarget, hwtarget, 6);
+    memcpy(request->hwsender, hwsender, 6);
+    memcpy(request->hwtarget, hwtarget, 6);
 }
 
 void arp_reply(struct arphdr *reply, struct arphdr *request) {
@@ -38,5 +39,5 @@ void arp_reply(struct arphdr *reply, struct arphdr *request) {
     reply->opcode = hton16(ARP_OP_REPLY);
     reply->psender = request->ptarget;
     reply->ptarget = request->psender;
-    memcopy(reply->hwtarget, request->hwsender, 6);
+    memcpy(reply->hwtarget, request->hwsender, 6);
 }
