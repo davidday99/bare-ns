@@ -3,8 +3,14 @@
 
 #include <stdint.h>
 
-#define ARP_OP_REQUEST 1
-#define ARP_OP_REPLY 2
+#define ARP_HW_TYPE_ENET 0x0001
+#define ARP_PTYPE_IPV4 0x0800
+
+#define ARP_HW_ENET_LEN 6
+#define ARP_P_IPV4_LEN 4
+
+#define ARP_OP_REQUEST 0x0001
+#define ARP_OP_REPLY 0x0002
 #define ARP_SIZE 28
 
 struct arphdr {
