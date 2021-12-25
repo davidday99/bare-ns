@@ -27,6 +27,9 @@
 
 #define IPV4_MIN_HEADER_LEN 20
 
+#define IPV4_PROTOCOL_ICMP 0x01
+#define IPV4_PROTOCOL_TCP 0x06
+
 struct ipv4hdr {
     uint8_t ihl : 4;
     uint8_t version : 4;
