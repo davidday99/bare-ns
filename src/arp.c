@@ -1,22 +1,7 @@
 #include <stdint.h>
 #include "arp.h"
 #include "netcommon.h"
-#include "stdlib.h"
-#include "string.h"
-
-#define ARP_HW_TYPE_ENET 0x0001
-#define ARP_PTYPE_IPV4 0x0800
-
-#define ARP_HW_ENET_LEN 6
-#define ARP_P_IPV4_LEN 4
-
-static int32_t arp_memcmp(uint8_t *arr1, uint8_t *arr2, uint32_t bytes) {
-    for (uint32_t i = 0; i < bytes; i++)
-        if (*arr1++ != *arr2++)
-            return 1;
-
-    return 0;
-}
+#include <string.h>
 
 void arp_request(struct arphdr *request, uint8_t *hwsender, uint32_t psender,
                 uint8_t *hwtarget, uint32_t ptarget) {
