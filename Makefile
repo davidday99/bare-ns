@@ -4,11 +4,13 @@ INC = inc
 TEST = test
 TEST_INC = test/inc
 OBJ = obj
+EOBJ = eobj
 ODIR = build
 
 SRCS = $(wildcard $(SRC)/*.c)
 TESTS = $(wildcard $(TEST)/*.c)
 OBJS = $(addprefix $(OBJ)/, $(notdir $(SRCS:.c=.o)))
+EOBJS = $(addprefix $(EOBJ)/, $(notdir $(SRCS:.c=.o)))
 TEST_OBJS = $(addprefix $(OBJ)/, $(notdir $(TESTS:.c=.o)))
 
 CC = gcc
@@ -17,12 +19,19 @@ RM      = rm -rf
 MKDIR   = @mkdir -p $(@D) #creates folders if not present
 CFLAGS = -I$(INC) -g3
 
-$(info $(TEST_OBJS))
+OPT += -O0
+
+XCFLAGS = -ggdb3 -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 
+XCFLAGS += -mfloat-abi=softfp -MD -std=c99 -c -Wextra -Wall -Wno-missing-braces -Wno-builtin-declaration-mismatch
+XCFLAGS += $(OPT)
+
+XCC = arm-none-eabi-gcc
 
 all: $(ODIR)/$(PROJECT).bin
 
 test: $(ODIR)/$(TEST)/test_runner
 
+embedded: $(EOBJS)
 
 $(OBJ)/%.o: $(SRC)/%.c
 	$(MKDIR)   
@@ -40,6 +49,10 @@ $(ODIR)/$(TEST)/test_runner: $(TEST_OBJS) $(filter-out $(OBJ)/main.o, $(OBJS))
 	$(MKDIR)
 	$(CC) -o $@ $^ $(CFLAGS)
 
+$(EOBJ)/%.o: $(SRC)/%.c
+	$(MKDIR)  
+	$(XCC) -o $@ $^ -c $(XCFLAGS) -I$(INC)
+
 debug:
 	$(DEBUGGER) --tui $(ODIR)/$(PROJECT).bin
 
@@ -47,5 +60,6 @@ debug:
 clean:
 	-$(RM) $(OBJ)
 	-$(RM) $(ODIR)
+	-$(RM) $(EOBJ)
 
 .PHONY: all clean
