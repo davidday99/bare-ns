@@ -14,4 +14,6 @@ struct tcphdr {
     uint16_t urgentptr;
 };
 
+#define TCP_DATA_OFFSET 176
+
 #endif /* _TCP_H_ */
