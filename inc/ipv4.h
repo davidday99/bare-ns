@@ -45,6 +45,8 @@ struct ipv4hdr {
     uint32_t dest;
 };
 
+void int_to_ipv4(uint32_t ip, char *ipv4);
+uint32_t ipv4_to_int(char *ipv4);
 uint8_t ipv4_options_len(struct ipv4hdr *hdr);
 uint8_t ipv4_data_len(struct ipv4hdr *hdr);
 

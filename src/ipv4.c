@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 #include "ipv4.h"
 #include "netcommon.h"
 
@@ -34,6 +35,32 @@ void int_to_ipv4(uint32_t ip, char *ipv4) {
     octet = ip & 0xFF;
     ipv4 += itos(octet, ipv4);
     *ipv4++ = '\0';
+}
+
+uint32_t stoi(char *s) {
+    uint32_t i = 0;
+    while (*s != '\0')
+        i = 10*i + (*s++ - '0');
+    return i;
+}
+
+uint32_t ipv4_to_int(char *ipv4) {
+    uint32_t ip = 0;
+    char copy[16];
+    strcpy(copy, ipv4);
+    char *start = copy;
+    char *end = start;
+
+    for (uint8_t i = 0; i < 4; i++) {
+        while (*end != '.' && *end != '\0')
+            end++;
+
+        *end = '\0';
+        ip = ip*256 + stoi(start);
+        end++;
+        start = end;
+    }
+    return ip;
 }
 
 uint8_t ipv4_options_len(struct ipv4hdr *hdr) {
