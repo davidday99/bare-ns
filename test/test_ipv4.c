@@ -32,6 +32,15 @@ uint8_t ip_packet[] = {
     0xA0,  // data, 2 bytes 0xA0A0
 };
 
+int test_int_to_ipv4() {
+    int success = 1;
+    char ipv4[16];
+    uint32_t ip = 0xC0A80001;
+    int_to_ipv4(ip, ipv4);
+    success = strcmp(ipv4, "192.168.0.1") == 0;
+    return success;
+}
+
 int test_ipv4_to_int() {
     int success = 1;
     char *ipv4 = "192.168.0.1";
@@ -81,6 +90,7 @@ int test_get_ip_data_len() {
 
 int test_ip() {
     int success = 1;
+    success &= test_int_to_ipv4();
     success &= test_ipv4_to_int();
     success &= test_read_ip_header();
     success &= test_get_ip_options_len();
