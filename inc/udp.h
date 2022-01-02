@@ -10,6 +10,6 @@ struct udphdr {
     uint16_t cksm;
 };
 
-#define UDP_DATA_OFFSET 64
+#define UDP_HEADER_SIZE 8
 
 #endif /* _UDP_H_ */
