@@ -100,6 +100,8 @@ int test_socket_write_buffer() {
     struct socket *s = socket_init(SOCKTYPE_UDP);
     socket_write_buffer(s, socket_udp_data, sizeof(socket_udp_data));
     success &= memcmp(s->sockbuf.ringbuf, socket_udp_data, sizeof(socket_udp_data)) == 0;
+    socket_close(s);
+    return success;
 }
 
 int test_socket() {
