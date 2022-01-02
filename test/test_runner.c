@@ -13,6 +13,7 @@ int test_arp();
 int test_ip();
 int test_icmp();
 int test_socket();
+int test_ipv4_to_udp_to_socket();
 
 int main() {
     printf("Running tests...\n\n");
@@ -21,6 +22,7 @@ int main() {
     assert(test_ip(), 1, "Failed test_ip");
     assert(test_icmp(), 1, "Failed test_icmp");
     assert(test_socket(), 1, "Failed test_socket");
+    assert(test_ipv4_to_udp_to_socket(), 1, "Failed test_ipv4_to_udp_to_socket");
     printf("Done.\n");
     return 0;
 }
