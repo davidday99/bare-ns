@@ -13,7 +13,7 @@ uint8_t ip_packet[] = {
     0x4F,
     0xAA,  // flags = 010, offset = 0b0111110101010
     0x40,  // TTL, 64
-    0x06,  // Protocl, 0x06 (TCP)
+    0x06,  // Protocol, 0x06 (TCP)
     0xAB,
     0xCD,  // Header checksum
     0xC0,
