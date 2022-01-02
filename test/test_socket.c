@@ -21,7 +21,7 @@ uint8_t socket_udp_data[] = {
     0xAF,
     0xFA,  // dest port
     0x00,
-    0x0C,  // size of UDP header plus data (2 bytes of data)
+    0x0A,  // size of UDP header plus data (2 bytes of data)
     0xAB,
     0xCD,  // dummy checksum
     0xFF,
