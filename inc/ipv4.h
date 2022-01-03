@@ -47,6 +47,10 @@ struct ipv4hdr {
 
 void ipv4_set_address(uint32_t ip);
 uint32_t ipv4_get_address(void);
+void ipv4_set_default_gateway(uint32_t gateway);
+uint32_t ipv4_get_default_gateway(void);
+void ipv4_set_subnet_mask(uint32_t mask);
+uint32_t ipv4_get_subnet_mask(void);
 uint8_t ipv4_options_len(struct ipv4hdr *hdr);
 uint8_t ipv4_data_len(struct ipv4hdr *hdr);
 void int_to_ipv4(uint32_t ip, char *ipv4);

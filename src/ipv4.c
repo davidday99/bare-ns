@@ -6,14 +6,32 @@
 uint8_t itos(uint32_t val, char *buf);
 uint32_t stoi(char *s);
 
-static uint32_t my_ipv4_address;
+static uint32_t ipv4_my_address;
+static uint32_t ipv4_default_gateway;
+static uint32_t ipv4_subnet_mask;
 
 void ipv4_set_address(uint32_t ip) {
-    my_ipv4_address = ip;
+    ipv4_my_address = ip;
 }
 
 uint32_t ipv4_get_address(void) {
-    return my_ipv4_address;
+    return ipv4_my_address;
+}
+
+void ipv4_set_default_gateway(uint32_t gateway) {
+    ipv4_default_gateway = gateway;
+}
+
+uint32_t ipv4_get_default_gateway(void) {
+    return ipv4_default_gateway;
+}
+
+void ipv4_set_subnet_mask(uint32_t mask) {
+    ipv4_subnet_mask = mask;
+}
+
+uint32_t ipv4_get_subnet_mask(void) {
+    return ipv4_subnet_mask;
 }
 
 uint8_t ipv4_options_len(struct ipv4hdr *hdr) {
