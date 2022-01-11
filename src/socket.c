@@ -4,9 +4,6 @@
 #include "udp.h"
 #include "netcommon.h"
 
-static struct socket *get_open_socket(uint16_t destport);
-static uint8_t get_unused_socket_slot();
-
 struct socket sockets[AVAILABLE_SOCKETS_NUM];
 
 struct socket *socket_init(enum SOCKET_TYPE socktype) {
@@ -52,11 +49,6 @@ uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t 
         buf[i++] = sock->sockbuf.ringbuf[sock->sockbuf.rdptr];
         sock->sockbuf.rdptr = (sock->sockbuf.rdptr + 1) % SOCKBUF_LEN;
     }
-    if (i < len)
-        buf[i] = '\0';
-    else
-        buf[len - 1] = '\0';
-
     return i;
 }
 
