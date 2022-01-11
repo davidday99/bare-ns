@@ -49,6 +49,12 @@ uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t 
         buf[i++] = sock->sockbuf.ringbuf[sock->sockbuf.rdptr];
         sock->sockbuf.rdptr = (sock->sockbuf.rdptr + 1) % SOCKBUF_LEN;
     }
+    
+    if (i < len)
+        buf[i] = '\0';
+    else
+        buf[len - 1] = '\0';
+
     return i;
 }
 
