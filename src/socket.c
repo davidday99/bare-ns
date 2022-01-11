@@ -34,6 +34,8 @@ void socket_close(struct socket *sock) {
 }
 
 uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len) {
+    while (sock->sockbuf.rdptr == sock->sockbuf.wrptr)
+        ;
     uint32_t ipv4 = *((uint32_t *) &sock->sockbuf.ringbuf[sock->sockbuf.rdptr]);
     sockaddr->ip = ipv4;
     if (sock->socktype == SOCKTYPE_UDP) {
@@ -50,6 +52,11 @@ uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t 
         buf[i++] = sock->sockbuf.ringbuf[sock->sockbuf.rdptr];
         sock->sockbuf.rdptr = (sock->sockbuf.rdptr + 1) % SOCKBUF_LEN;
     }
+    if (i < len)
+        buf[i] = '\0';
+    else
+        buf[len - 1] = '\0';
+
     return i;
 }
 
