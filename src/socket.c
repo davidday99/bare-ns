@@ -49,26 +49,12 @@ uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t 
         buf[i++] = sock->sockbuf.ringbuf[sock->sockbuf.rdptr];
         sock->sockbuf.rdptr = (sock->sockbuf.rdptr + 1) % SOCKBUF_LEN;
     }
-    
-    if (i < len)
-        buf[i] = '\0';
-    else
-        buf[len - 1] = '\0';
 
     return i;
 }
 
-void socket_send(struct socket *sock, uint8_t *buf, uint16_t len) {
-    switch (sock->socktype) {
-        case SOCKTYPE_TCP:
-            // tcp_write()
-            break;
-        case SOCKTYPE_UDP:
-            // udp_write()
-            break;
-        default:
-            break;
-    }
+void socket_sendto(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len) {
+    udp_send(sock->srcport, sockaddr->ip, sockaddr->port, buf, len);
 }
 
 uint16_t socket_write_buffer(struct socket *sock, uint8_t *buf, uint16_t len) {
