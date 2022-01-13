@@ -14,6 +14,8 @@ struct tcphdr {
     uint16_t urgentptr;
 };
 
+void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len);
+
 #define TCP_DATA_OFFSET 176
 
 #endif /* _TCP_H_ */
