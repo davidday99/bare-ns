@@ -11,6 +11,7 @@ void udp_send(uint16_t srcport, uint32_t destip, uint16_t destport, uint8_t *dat
     struct udphdr *hdr = (struct udphdr *) udpsegment;
     hdr->srcport = hton16(srcport);
     hdr->destport = hton16(destport);
+    hdr->len = hton16(len + UDP_HEADER_SIZE);
     hdr->cksm = hton16(calculate_udp_checksum(ipv4_get_address(), destip, hdr, data, len));
     
     memcpy(udpsegment + UDP_HEADER_SIZE, data, len);
