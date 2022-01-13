@@ -45,7 +45,7 @@ int test_ipv4_to_udp_to_socket() {
     struct socket_addr sockaddr = {ipv4_to_int("192.168.0.111"), 80};
     socket_bind(s, &sockaddr);
 
-    ipv4_deliver((struct ipv4hdr *) ipv4_packet);
+    ipv4_deliver(ipv4_packet);
 
     uint8_t data[2];
     struct socket_addr clientaddr;

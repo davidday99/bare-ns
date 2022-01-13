@@ -5,16 +5,17 @@
 #include "udp.h"
 #include "netcommon.h"
 
-void ipv4_deliver(struct ipv4hdr *pkt) {
-    uint8_t options_len = ipv4_options_len(pkt);
-    uint8_t *payload = (uint8_t *) &((uint8_t  *) pkt)[IPV4_MIN_HEADER_LEN + options_len];
+void ipv4_deliver(uint8_t *buf) {
+    struct ipv4hdr *hdr = (struct ipv4hdr *) buf;
+    uint8_t options_len = ipv4_options_len(hdr);
+    uint8_t *payload = (uint8_t *) &((uint8_t  *) hdr)[IPV4_MIN_HEADER_LEN + options_len];
 
-    switch (pkt->protocol) {
+    switch (hdr->protocol) {
         case IPV4_PROTOCOL_TCP:
-            tcp_deliver(payload, hton32(pkt->src), hton32(pkt->dest), ipv4_data_len(pkt));
+            tcp_deliver(payload, hton32(hdr->src), hton32(hdr->dest), ipv4_data_len(hdr));
             break;
         case IPV4_PROTOCOL_UDP:
-            udp_deliver(payload, hton32(pkt->src), hton32(pkt->dest), ipv4_data_len(pkt));
+            udp_deliver(payload, hton32(hdr->src), hton32(hdr->dest), ipv4_data_len(hdr));
             break;
         case IPV4_PROTOCOL_ICMP:
             // icmp_handle()
