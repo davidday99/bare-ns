@@ -1,9 +1,8 @@
 #include <stdint.h>
-#include "ipv4_in.h"
 #include "ipv4.h"
 #include "tcp.h"
-#include "tcp_in.h"
-#include "udp_in.h"
+#include "tcp.h"
+#include "udp.h"
 #include "netcommon.h"
 
 void ipv4_deliver(struct ipv4hdr *pkt) {
