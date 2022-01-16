@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-__attribute__ ((weak)) void net_tx(uint8_t *data, uint16_t len) {
+__attribute__ ((weak)) void net_tx(uint8_t *data, uint16_t len, uint16_t type) {
     return;
 }
 
