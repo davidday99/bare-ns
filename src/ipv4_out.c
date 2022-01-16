@@ -17,8 +17,8 @@ void ipv4_send(uint32_t destip, uint8_t *data, uint16_t len, uint8_t protcol) {
     hdr->ttl = 64;
     hdr->protocol = protcol;
     hdr->cksm = 0;
-    hdr->dest = hton32(destip);
+    hdr->dest = destip;
     hdr->src = hton32(ipv4_get_address());
     memcpy(ipv4pkt + IPV4_MIN_HEADER_LEN, data, len);
-    net_tx(ipv4pkt, sizeof(ipv4pkt), ETHERTYPE_IPV4);
+    net_tx(0, ipv4pkt, sizeof(ipv4pkt), ETHERTYPE_IPV4);
 }
