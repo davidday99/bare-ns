@@ -3,6 +3,7 @@
 #include "net.h"
 #include "netcommon.h"
 #include "string.h"
+#include "ethernet.h"
 
 void ipv4_send(uint32_t destip, uint8_t *data, uint16_t len, uint8_t protcol) {
     uint8_t ipv4pkt[IPV4_MIN_HEADER_LEN + len];
@@ -19,5 +20,5 @@ void ipv4_send(uint32_t destip, uint8_t *data, uint16_t len, uint8_t protcol) {
     hdr->dest = hton32(destip);
     hdr->src = hton32(ipv4_get_address());
     memcpy(ipv4pkt + IPV4_MIN_HEADER_LEN, data, len);
-    net_tx(ipv4pkt, sizeof(ipv4pkt));
+    net_tx(ipv4pkt, sizeof(ipv4pkt), ETHERTYPE_IPV4);
 }
