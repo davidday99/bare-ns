@@ -33,16 +33,20 @@ void socket_close(struct socket *sock) {
 uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len) {
     while (sock->sockbuf.rdptr == sock->sockbuf.wrptr)
         ;
-    uint32_t ipv4 = *((uint32_t *) &sock->sockbuf.ringbuf[sock->sockbuf.rdptr]);
+    uint32_t ipv4 = (uint32_t) (sock->sockbuf.ringbuf[sock->sockbuf.rdptr] << 24 |
+                                    sock->sockbuf.ringbuf[(sock->sockbuf.rdptr + 1) % SOCKBUF_LEN] << 16 |
+                                    sock->sockbuf.ringbuf[(sock->sockbuf.rdptr + 2) % SOCKBUF_LEN] << 8 |
+                                    sock->sockbuf.ringbuf[(sock->sockbuf.rdptr + 3) % SOCKBUF_LEN]);
     sockaddr->ip = ipv4;
+    sock->sockbuf.rdptr = (sock->sockbuf.rdptr + IP_METADATA_SIZE) % SOCKBUF_LEN;
     if (sock->socktype == SOCKTYPE_UDP) {
-        struct udphdr *hdr = (struct udphdr *) &sock->sockbuf
-                            .ringbuf[(sock->sockbuf.rdptr + IP_METADATA_SIZE) % SOCKBUF_LEN];
-        sockaddr->port = hton16(hdr->srcport);
+        uint16_t port = sock->sockbuf.ringbuf[sock->sockbuf.rdptr] << 8 |
+                                    sock->sockbuf.ringbuf[(sock->sockbuf.rdptr + 1) % SOCKBUF_LEN];
+        sockaddr->port = port;
         sock->sockbuf.rdptr = (sock->sockbuf.rdptr + UDP_HEADER_SIZE) % SOCKBUF_LEN;
     }
     /* advance the read pointer past all the header data */
-    sock->sockbuf.rdptr = (sock->sockbuf.rdptr + IP_METADATA_SIZE) % SOCKBUF_LEN;
+    // sock->sockbuf.rdptr = (sock->sockbuf.rdptr + IP_METADATA_SIZE) % SOCKBUF_LEN;
 
     uint16_t i = 0;
     while (i < len && sock->sockbuf.rdptr != sock->sockbuf.wrptr) {
