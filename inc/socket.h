@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define SOCKBUF_LEN 500
+#define SOCKBUF_LEN 1000
 #define AVAILABLE_SOCKETS_NUM 4
 #define NULL 0
 #define SOCKET_OPEN 1
@@ -19,8 +19,8 @@ enum SOCKET_TYPE {
 
 struct socket_buffer {
     uint8_t ringbuf[SOCKBUF_LEN];
-    uint8_t rdptr;
-    uint8_t wrptr;
+    uint16_t rdptr;
+    uint16_t wrptr;
 };
 
 struct socket_addr {
