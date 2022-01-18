@@ -37,7 +37,7 @@ uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t 
                                     sock->sockbuf.ringbuf[(sock->sockbuf.rdptr + 1) % SOCKBUF_LEN] << 16 |
                                     sock->sockbuf.ringbuf[(sock->sockbuf.rdptr + 2) % SOCKBUF_LEN] << 8 |
                                     sock->sockbuf.ringbuf[(sock->sockbuf.rdptr + 3) % SOCKBUF_LEN]);
-    sockaddr->ip = ipv4;
+    sockaddr->ip = hton32(ipv4);
     sock->sockbuf.rdptr = (sock->sockbuf.rdptr + IP_METADATA_SIZE) % SOCKBUF_LEN;
     if (sock->socktype == SOCKTYPE_UDP) {
         uint16_t port = sock->sockbuf.ringbuf[sock->sockbuf.rdptr] << 8 |
