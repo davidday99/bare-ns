@@ -28,7 +28,7 @@ void udp_send(uint16_t srcport, uint32_t destip, uint16_t destport, uint8_t *dat
 
     hdr->cksm = calculate_udp_checksum(udpsegment, sizeof(udpsegment));
     
-    ipv4_send(hton32(destip), &udpsegment[UDP_PSEUDO_HEADER_SIZE], total_udpsegment_len, IPV4_PROTOCOL_UDP);
+    ipv4_send(destip, &udpsegment[UDP_PSEUDO_HEADER_SIZE], total_udpsegment_len, IPV4_PROTOCOL_UDP);
 }
 
 static uint16_t calculate_udp_checksum(uint8_t *data, uint16_t len) {
