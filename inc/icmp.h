@@ -12,7 +12,7 @@
 struct icmp_echohdr {
     uint8_t type;
     uint8_t code;
-    uint16_t chksm;
+    uint16_t cksm;
     uint16_t id;
     uint16_t seqnum;
 };
