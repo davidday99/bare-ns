@@ -8,10 +8,12 @@ struct tcphdr {
     uint16_t destport;
     uint32_t seqnum;
     uint32_t acknum;
-    uint16_t flags;
-    uint32_t window;
-    uint16_t chksm;
-    uint16_t urgentptr;
+    uint8_t reserved : 4;
+    uint8_t offset : 4;
+    uint8_t ctl;
+    uint16_t window;
+    uint16_t cksm;
+    uint16_t urgent;
 };
 
 void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len);
