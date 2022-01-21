@@ -13,9 +13,17 @@ void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len
     sockaddr.port = hton16(hdr->destport);
     struct socket *s = socket_get_listener(&sockaddr, SOCKTYPE_TCP);
 
-    if (s != NULL) {
-        socket_write_buffer(s, (uint8_t *) &srcip, sizeof(srcip));
-        socket_write_buffer(s, (uint8_t *) &destip, sizeof(destip));
-        socket_write_buffer(s, payload, len);
+    if (s == NULL)
+        return;
+        // send RST
+
+    switch (s->tcb.state) {
+        case CLOSED:
+            break;
+        case LISTENING:
+            tcp_handle_listening_state(&s->tcb, hdr);
+            break;
+        case SYN_RECEIVED:
+            tcp_handle_syn_received_state(&s->tcb, hdr)
     }
 }
