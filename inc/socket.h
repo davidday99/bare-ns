@@ -2,6 +2,7 @@
 #define _SOCKET_H_
 
 #include <stdint.h>
+#include "tcp.h"
 
 #define SOCKBUF_LEN 1000
 #define AVAILABLE_SOCKETS_NUM 4
@@ -30,6 +31,7 @@ struct socket_addr {
 
 struct socket {
     struct socket_buffer sockbuf;
+    struct TCB tcb;
     uint32_t dest;
     uint16_t srcport;
     enum SOCKET_TYPE socktype;
