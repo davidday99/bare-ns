@@ -17,7 +17,7 @@ void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr) {
     }
 }
 
-void tcp_handle_syn_receive_state(struct TCB *tcb, struct tcphdr *hdr) {
+void tcp_handle_syn_received_state(struct TCB *tcb, struct tcphdr *hdr) {
     struct tcphdr *tx_hdr = tcb->txbuf.ringbuf;
     if (hton16(hdr->ctl) & ACK) {
         tcb->state = ESTABLISHED;

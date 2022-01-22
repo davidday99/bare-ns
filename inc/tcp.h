@@ -76,7 +76,7 @@ void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len
 void tcp_send(uint8_t *data, uint16_t len);
 
 void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr);
-void tcp_handle_syn_receive_state(struct TCB *tcb, struct tcphdr *hdr);
+void tcp_handle_syn_received_state(struct TCB *tcb, struct tcphdr *hdr);
 
 #define TCP_DATA_OFFSET 176
 
