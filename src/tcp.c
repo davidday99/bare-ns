@@ -1,6 +1,7 @@
 #include "tcp.h"
+#include "netcommon.h"
 
-void tcp_handle_listening(struct TCB *tcb, struct tcphdr *hdr) {
+void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr) {
     struct tcphdr *tx_hdr = tcb->txbuf.ringbuf;
     if (hton16(hdr->ctl) & SYN) {
         tcb->state = SYN_RECEIVED;
