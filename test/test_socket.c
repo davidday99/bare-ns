@@ -32,7 +32,6 @@ uint8_t socket_udp_data[] = {
 int test_socket_init() {
     int success = 1;
     struct socket *s = socket_init(SOCKTYPE_UDP);
-    success &= s->dest == 0;
     success &= s->srcport == 0;
     success &= s->socktype == SOCKTYPE_UDP;
     success &= s->open == SOCKET_OPEN;
@@ -45,9 +44,7 @@ int test_socket_init() {
 int test_socket_bind() {
     int success = 1;
     struct socket *s = socket_init(SOCKTYPE_UDP);
-    struct socket_addr saddr = {ipv4_to_int("192.168.0.1"), 42};
-    socket_bind(s, &saddr);
-    success &= s->dest == 0xC0A80001;
+    socket_bind(s, 42);
     success &= s->srcport == 42;
     
     socket_close(s);
@@ -58,7 +55,6 @@ int test_socket_bind() {
 int test_socket_close() {
     int success = 1;
     struct socket *s = socket_init(SOCKTYPE_UDP);
-    s->dest = 0xFFFFFFFF;
     s->srcport = 42;
     socket_close(s);
     success &= s->open == SOCKET_NOT_OPEN;
@@ -69,8 +65,8 @@ int test_socket_close() {
 int test_socket_get_listener() {
     int success = 1;
     struct socket *s = socket_init(SOCKTYPE_UDP);
-    struct socket_addr saddr = {ipv4_to_int("192.168.0.1"), 42};
-    socket_bind(s, &saddr);
+    struct socket_addr saddr = {0, 42};
+    socket_bind(s, 42);
     struct socket *listener = socket_get_listener(&saddr, SOCKTYPE_UDP);
     success &= s == listener;
     socket_close(s);

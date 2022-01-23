@@ -4,7 +4,7 @@
 #include "net.h"
 #include "string.h"
 
-static uint8_t tx_buf[32];
+extern uint8_t tx_buf[];
 
 static uint8_t expected[] = {
     0x45,
@@ -17,8 +17,8 @@ static uint8_t expected[] = {
     0x00,
     0x40,
     0x11,
-    0x00,
-    0x00,
+    0x7A,
+    0x24,  // ipv4 checksum
     0x00,
     0x00,
     0x00,
@@ -33,26 +33,21 @@ static uint8_t expected[] = {
     0x10,
     0x00,
     0x0C,
-    0x00,
-    0x00,
+    0xA1, 
+    0x2F,  // udp checksum
     0xDE,
     0xAD,
     0xBE,
     0xEF
 };
 
-void net_tx(uint8_t *data, uint16_t len) {
-    memcpy(tx_buf, data, len);
-}
-
 int test_socket_send() {
     int success = 1;
 
     struct socket *s = socket_init(SOCKTYPE_UDP);
-    struct socket_addr server_addr = {SOCKADDR_IP_ANY, 80};
     struct socket_addr receiver_addr = {ipv4_to_int("192.168.0.1"), 16};
 
-    socket_bind(s, &server_addr);
+    socket_bind(s, 80);
 
     uint8_t data[4] = {0xDE, 0xAD, 0xBE, 0xEF};
 

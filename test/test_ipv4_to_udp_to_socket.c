@@ -43,7 +43,7 @@ int test_ipv4_to_udp_to_socket() {
 
     struct socket *s = socket_init(SOCKTYPE_UDP);
     struct socket_addr sockaddr = {ipv4_to_int("192.168.0.111"), 80};
-    socket_bind(s, &sockaddr);
+    socket_bind(s, 80);
 
     ipv4_deliver(ipv4_packet);
 
