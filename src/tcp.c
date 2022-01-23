@@ -14,7 +14,7 @@ void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr) {
         tx_hdr->ctl |= ACK;
         tx_hdr->seqnum = tcb->seqnum;
         tx_hdr->acknum = tcb->acknum;
-        tx_hdr->offset = 0;
+        tx_hdr->offset = 5;
         tx_hdr->window = 0xFFFF;  // TODO: determine whether this starting value will work
         tx_hdr->cksm = 0;
         tx_hdr->urgent = 0;
