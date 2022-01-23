@@ -32,15 +32,15 @@ struct socket_addr {
 struct socket {
     struct socket_buffer sockbuf;
     struct TCB tcb;
-    uint32_t dest;
     uint16_t srcport;
     enum SOCKET_TYPE socktype;
-    struct socket_addr *sockaddr;
+    struct socket_addr clientaddr;
     uint8_t open;
 };
 
 struct socket *socket_init(enum SOCKET_TYPE socktype);
-void socket_bind(struct socket *sock, struct socket_addr *sockaddr);
+void socket_bind(struct socket *sock, uint16_t port);
+void socket_accept(struct socket *sock);
 void socket_close(struct socket *sock);
 uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len);
 void socket_sendto(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len);

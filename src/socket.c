@@ -6,24 +6,39 @@
 
 struct socket sockets[AVAILABLE_SOCKETS_NUM];
 
+static struct socket *socket_get_udp_listener(struct socket_addr *sockaddr);
+static struct socket *socket_get_tcp_listener(struct socket_addr *sockaddr);
+
 struct socket *socket_init(enum SOCKET_TYPE socktype) {
     for (uint8_t i = 0; i < AVAILABLE_SOCKETS_NUM; i++) {
         if (!sockets[i].open) {
             sockets[i].sockbuf.rdptr = 0;
             sockets[i].sockbuf.wrptr = 0;
-            sockets[i].dest = 0;
             sockets[i].srcport = 0;
             sockets[i].socktype = socktype;
             sockets[i].open = SOCKET_OPEN;
+            sockets[i].tcb.state = CLOSED;
+            sockets[i].tcb.txbuf.rdptr = 0;
+            sockets[i].tcb.txbuf.wrptr = 0;
+            sockets[i].tcb.rxbuf.rdptr = 0;
+            sockets[i].tcb.rxbuf.wrptr = 0;
             return &sockets[i];
         }
     }
     return NULL;
 }
 
-void socket_bind(struct socket *sock, struct socket_addr *sockaddr) {
-    sock->dest = sockaddr->ip;
-    sock->srcport = sockaddr->port;
+void socket_bind(struct socket *sock, uint16_t port) {
+    sock->srcport = port;
+}
+
+void socket_connect(struct socket *sock) {
+    return;  // TODO: implement
+}
+
+void socket_accept(struct socket *sock) {
+    while (sock->tcb.state != ESTABLISHED)
+        ;
 }
 
 void socket_close(struct socket *sock) {
@@ -74,9 +89,26 @@ uint16_t socket_write_buffer(struct socket *sock, uint8_t *buf, uint16_t len) {
 }
 
 struct socket *socket_get_listener(struct socket_addr *sockaddr, enum SOCKET_TYPE socktype) {
+    if (socktype == SOCKTYPE_UDP)
+        return socket_get_udp_listener(sockaddr);
+    else if (socktype == SOCKTYPE_TCP)
+        return socket_get_tcp_listener(sockaddr);
+
+    return NULL;
+}
+
+static struct socket *socket_get_udp_listener(struct socket_addr *sockaddr) {
     for (uint8_t i = 0; i < AVAILABLE_SOCKETS_NUM; i++) {
-        if (sockets[i].open && sockets[i].srcport == sockaddr->port && sockets[i].socktype == socktype &&
-            (sockets[i].dest == sockaddr->ip || sockets[i].dest == SOCKADDR_IP_ANY))
+        if (sockets[i].open && sockets[i].srcport == sockaddr->port)
+            return &sockets[i];
+    }
+    return NULL;
+}
+
+static struct socket *socket_get_tcp_listener(struct socket_addr *sockaddr) {
+     for (uint8_t i = 0; i < AVAILABLE_SOCKETS_NUM; i++) {
+        if (sockets[i].srcport == sockaddr->port && (sockets[i].tcb.state == LISTENING ||
+            (sockets[i].tcb.state != CLOSED && sockets[i].clientaddr->ip == sockaddr->ip)))
             return &sockets[i];
     }
     return NULL;
