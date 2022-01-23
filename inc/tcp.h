@@ -73,7 +73,7 @@ struct TCB {
 
 void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len);
 
-void tcp_send(uint8_t *data, uint16_t len);
+void tcp_send(uint32_t destip, uint8_t *data, uint16_t len);
 
 void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr);
 void tcp_handle_syn_received_state(struct TCB *tcb, struct tcphdr *hdr);
