@@ -108,7 +108,7 @@ static struct socket *socket_get_udp_listener(struct socket_addr *sockaddr) {
 static struct socket *socket_get_tcp_listener(struct socket_addr *sockaddr) {
      for (uint8_t i = 0; i < AVAILABLE_SOCKETS_NUM; i++) {
         if (sockets[i].srcport == sockaddr->port && (sockets[i].tcb.state == LISTENING ||
-            (sockets[i].tcb.state != CLOSED && sockets[i].clientaddr->ip == sockaddr->ip)))
+            (sockets[i].tcb.state != CLOSED && sockets[i].clientaddr.ip == sockaddr->ip)))
             return &sockets[i];
     }
     return NULL;
