@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 
 uint8_t tx_buf[2000];
 
