@@ -24,7 +24,10 @@ void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr) {
 
 void tcp_handle_syn_received_state(struct TCB *tcb, struct tcphdr *hdr) {
     struct tcphdr *tx_hdr = (struct tcphdr *) tcb->txbuf.ringbuf;
-    if (hton16(hdr->ctl) & ACK) {
+    if (hton16(hdr->ctl) == ACK) {
         tcb->state = ESTABLISHED;
+    } else {
+        tcb->state = LISTENING;
+        // send RST message
     }
 }
