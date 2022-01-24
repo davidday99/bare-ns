@@ -3,9 +3,7 @@
 #include "ipv4.h"
 #include "netcommon.h"
 #include "string.h"
-
-static uint16_t calculate_udp_checksum(uint8_t *data, uint16_t len);
-static uint16_t ones_complement_sum(uint8_t *data, uint16_t len);
+#include "checksum.h"
 
 void udp_send(uint16_t srcport, uint32_t destip, uint16_t destport, uint8_t *data, uint16_t len) {
     uint8_t udpsegment[UDP_PSEUDO_HEADER_SIZE + UDP_HEADER_SIZE + len];
@@ -26,34 +24,7 @@ void udp_send(uint16_t srcport, uint32_t destip, uint16_t destport, uint8_t *dat
     hdr->cksm = 0;
     memcpy(udpsegment + UDP_PSEUDO_HEADER_SIZE + UDP_HEADER_SIZE, data, len);
 
-    hdr->cksm = calculate_udp_checksum(udpsegment, sizeof(udpsegment));
+    hdr->cksm = ~ones_complement_sum(udpsegment, sizeof(udpsegment));
     
     ipv4_send(destip, &udpsegment[UDP_PSEUDO_HEADER_SIZE], total_udpsegment_len, IPV4_PROTOCOL_UDP);
-}
-
-static uint16_t calculate_udp_checksum(uint8_t *data, uint16_t len) {
-    uint16_t sum = ones_complement_sum(data, len);
-    sum = ~sum;
-    return sum;
-}
-
-static uint16_t ones_complement_sum(uint8_t *data, uint16_t len) {
-    uint16_t *ptr_two_bytes = (uint16_t *) data;
-    uint32_t overflow;
-    uint32_t sum = 0;
-    
-    for (uint16_t i = 0; i < len / 2; i++) {
-        sum += *ptr_two_bytes++;
-    }
-    
-    if (len & 1) {
-        sum += *ptr_two_bytes & 0xFF;
-    }
-    
-    while ((overflow = (sum & 0xFFFF0000))) {
-        overflow >>= 16;
-        sum = (sum & 0xFFFF) + overflow;
-    }
-    
-    return sum;
 }
