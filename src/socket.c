@@ -37,6 +37,7 @@ void socket_connect(struct socket *sock) {
 }
 
 void socket_accept(struct socket *sock) {
+    sock->tcb.state = LISTENING;
     while (sock->tcb.state != ESTABLISHED)
         ;
 }

@@ -22,6 +22,7 @@ void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len
             break;
         case LISTENING:
             tcp_handle_listening_state(&s->tcb, hdr);
+            tcp_send(srcip, s->tcb.txbuf.ringbuf, s->tcb.txbuf.wrptr);
             s->clientaddr.ip = srcip;
             s->clientaddr.port = hton16(hdr->srcport);
             break;
@@ -31,5 +32,4 @@ void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len
         default:
             break;
     }
-    tcp_send(destip, s->tcb.txbuf.ringbuf, s->tcb.txbuf.wrptr);
 }
