@@ -20,8 +20,6 @@ struct socket *socket_init(enum SOCKET_TYPE socktype) {
             sockets[i].tcb.state = CLOSED;
             sockets[i].tcb.txbuf.rdptr = 0;
             sockets[i].tcb.txbuf.wrptr = 0;
-            sockets[i].tcb.rxbuf.rdptr = 0;
-            sockets[i].tcb.rxbuf.wrptr = 0;
             return &sockets[i];
         }
     }
