@@ -2,14 +2,17 @@
 #include "tcp.h"
 #include "socket.h"
 #include "netcommon.h"
+#include "checksum.h"
+#include "ipv4.h"
 
 uint16_t socket_write_buffer(struct socket *sock, uint8_t *buf, uint16_t len);
 
-void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len) {
+void tcp_deliver(uint8_t *data, uint8_t *pseudo) {
     // use srcip and destip to verify checksum
-    struct tcphdr *hdr = (struct tcphdr *) payload;
+    struct tcphdr *hdr = (struct tcphdr *) data;
+    struct pseudohdr *phdr = (struct pseudohdr *) pseudo;
     struct socket_addr sockaddr;
-    sockaddr.ip = srcip;
+    sockaddr.ip = hton32(phdr->srcip);
     sockaddr.port = hton16(hdr->destport);
     struct socket *s = socket_get_listener(&sockaddr, SOCKTYPE_TCP);
 
@@ -17,13 +20,15 @@ void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len
         return;
         // send RST
 
+    if (calculate_tcp_checksum(data, pseudo) != 0)
+        return;
+    
     switch (s->tcb.state) {
         case CLOSED:
             break;
         case LISTENING:
             tcp_handle_listening_state(&s->tcb, hdr);
-            tcp_send(srcip, s->tcb.txbuf.ringbuf, s->tcb.txbuf.wrptr);
-            s->clientaddr.ip = srcip;
+            s->clientaddr.ip = sockaddr.ip;
             s->clientaddr.port = hton16(hdr->srcport);
             break;
         case SYN_RECEIVED:
@@ -31,5 +36,10 @@ void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len
             break;
         default:
             break;
+    }
+
+    if (s->tcb.transmit) {
+        tcp_send(sockaddr.ip, s->tcb.txbuf.ringbuf, s->tcb.txbuf.wrptr);
+        s->tcb.transmit = 0;
     }
 }

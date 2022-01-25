@@ -41,7 +41,7 @@ enum TCP_OPTIONS {
     MSS
 };
 
-enum TCP_STATES {
+enum TCP_STATE {
     LISTENING,
     SYN_SENT,
     SYN_RECEIVED,
@@ -62,22 +62,25 @@ struct tcp_buffer {
 };
 
 struct TCB {
-    enum TCP_STATES state;
+    enum TCP_STATE state;
+    enum TCP_STATE prevstate;
     uint32_t snd_una;
     uint32_t seqnum;
     uint32_t acknum;
     uint16_t window;
     struct tcp_buffer txbuf;
-    struct tcp_buffer rxbuf;
+    uint8_t transmit;
 };
 
-void tcp_deliver(uint8_t *payload, uint32_t srcip, uint32_t destip, uint16_t len);
+void tcp_deliver(uint8_t *data, uint8_t *pseudo);
 
 void tcp_send(uint32_t destip, uint8_t *data, uint16_t len);
 
 void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr);
 void tcp_handle_syn_received_state(struct TCB *tcb, struct tcphdr *hdr);
+uint16_t calculate_tcp_checksum(uint8_t *tcpdata, uint8_t *pseudo);
 
 #define TCP_DATA_OFFSET 176
+#define TCP_HEADER_LEN 20
 
 #endif /* _TCP_H_ */

@@ -5,8 +5,8 @@
 #include "checksum.h"
 
 void tcp_send(uint32_t destip, uint8_t *data, uint16_t len) {
-    uint8_t pseudohdr[sizeof(struct tcppseudohdr) + len];
-    struct tcppseudohdr *phdr = (struct tcppseudohdr *) pseudohdr;
+    uint8_t pseudohdr[sizeof(struct pseudohdr)];
+    struct pseudohdr *phdr = (struct pseudohdr *) pseudohdr;
     struct tcphdr *hdr = (struct tcphdr *) data;
 
     phdr->srcip = hton32(ipv4_get_address());
@@ -14,8 +14,8 @@ void tcp_send(uint32_t destip, uint8_t *data, uint16_t len) {
     phdr->zero = 0;
     phdr->pctl = 6;
     phdr->len = hton16(len);
-    memcpy(&pseudohdr[sizeof(struct tcppseudohdr)], data, len);
-    hdr->cksm = ~ones_complement_sum(pseudohdr, sizeof(pseudohdr));
+    hdr->cksm = calculate_tcp_checksum(data, pseudohdr);
+    
 
     ipv4_send(destip, data, len, IPV4_PROTOCOL_TCP);
 }
