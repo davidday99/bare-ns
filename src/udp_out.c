@@ -24,7 +24,7 @@ void udp_send(uint16_t srcport, uint32_t destip, uint16_t destport, uint8_t *dat
     hdr->cksm = 0;
     memcpy(udpsegment + UDP_PSEUDO_HEADER_SIZE + UDP_HEADER_SIZE, data, len);
 
-    hdr->cksm = ~ones_complement_sum(udpsegment, sizeof(udpsegment));
+    hdr->cksm = ~ones_complement_sum_buffer(udpsegment, sizeof(udpsegment));
     
     ipv4_send(destip, &udpsegment[UDP_PSEUDO_HEADER_SIZE], total_udpsegment_len, IPV4_PROTOCOL_UDP);
 }

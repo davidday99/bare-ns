@@ -20,7 +20,7 @@ void ipv4_send(uint32_t destip, uint8_t *data, uint16_t len, uint8_t protcol) {
     hdr->cksm = 0;
     hdr->dest = hton32(destip);
     hdr->src = hton32(ipv4_get_address());
-    hdr->cksm = ~ones_complement_sum(ipv4pkt, IPV4_MIN_HEADER_LEN);
+    hdr->cksm = ~ones_complement_sum_buffer(ipv4pkt, IPV4_MIN_HEADER_LEN);
     memcpy(ipv4pkt + IPV4_MIN_HEADER_LEN, data, len);
     net_tx(0, ipv4pkt, sizeof(ipv4pkt), ETHERTYPE_IPV4);
 }
