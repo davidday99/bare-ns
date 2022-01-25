@@ -20,7 +20,8 @@ void tcp_deliver(uint8_t *data, uint8_t *pseudo) {
         return;
         // send RST
 
-    if (calculate_tcp_checksum(data, pseudo) != 0)
+    if (calculate_tcp_checksum(data, pseudo) != 0 || 
+        !tcp_valid_segment(&s->tcb, hton32(hdr->seqnum)))
         return;
     
     switch (s->tcb.state) {
@@ -34,6 +35,8 @@ void tcp_deliver(uint8_t *data, uint8_t *pseudo) {
         case SYN_RECEIVED:
             tcp_handle_syn_received_state(&s->tcb, hdr);
             break;
+        case ESTABLISHED:
+            tcp_handle_established_state(&s->tcb, hdr, &data[hdr->offset * 4], phdr);
         default:
             break;
     }

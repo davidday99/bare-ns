@@ -2,6 +2,7 @@
 #define _TCP_H_
 
 #include <stdint.h>
+#include "ipv4.h"
 
 #define TCP_BUF_LEN 1024
 
@@ -78,7 +79,9 @@ void tcp_send(uint32_t destip, uint8_t *data, uint16_t len);
 
 void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr);
 void tcp_handle_syn_received_state(struct TCB *tcb, struct tcphdr *hdr);
+void tcp_handle_established_state(struct TCB *tcb, struct tcphdr *hdr, uint8_t *data, struct pseudohdr *phdr);
 uint16_t calculate_tcp_checksum(uint8_t *tcpdata, uint8_t *pseudo);
+uint8_t tcp_valid_segment(struct TCB *tcb, uint32_t seqnum);
 
 #define TCP_DATA_OFFSET 176
 #define TCP_HEADER_LEN 20
