@@ -44,7 +44,7 @@ void socket_close(struct socket *sock) {
     sock->open = SOCKET_NOT_OPEN;
 }
 
-uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len) {
+uint16_t socket_recv(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len) {
     while (sock->sockbuf.rdptr == sock->sockbuf.wrptr)
         ;
     uint32_t ipv4 = (uint32_t) (sock->sockbuf.ringbuf[sock->sockbuf.rdptr] << 24 |
@@ -62,6 +62,18 @@ uint16_t socket_read(struct socket *sock, struct socket_addr *sockaddr, uint8_t 
     /* advance the read pointer past all the header data */
     // sock->sockbuf.rdptr = (sock->sockbuf.rdptr + IP_METADATA_SIZE) % SOCKBUF_LEN;
 
+    uint16_t i = 0;
+    while (i < len && sock->sockbuf.rdptr != sock->sockbuf.wrptr) {
+        buf[i++] = sock->sockbuf.ringbuf[sock->sockbuf.rdptr];
+        sock->sockbuf.rdptr = (sock->sockbuf.rdptr + 1) % SOCKBUF_LEN;
+    }
+
+    return i;
+}
+
+uint16_t socket_read(struct socket *sock, uint8_t *buf, uint16_t len) {
+    while (sock->sockbuf.rdptr == sock->sockbuf.wrptr)
+        ;
     uint16_t i = 0;
     while (i < len && sock->sockbuf.rdptr != sock->sockbuf.wrptr) {
         buf[i++] = sock->sockbuf.ringbuf[sock->sockbuf.rdptr];
