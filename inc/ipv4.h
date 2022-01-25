@@ -45,6 +45,14 @@ struct ipv4hdr {
     uint32_t dest;
 };
 
+struct pseudohdr {
+    uint32_t srcip;
+    uint32_t destip;
+    uint8_t zero;
+    uint8_t pctl;
+    uint16_t len;
+};
+
 void ipv4_set_address(uint32_t ip);
 uint32_t ipv4_get_address(void);
 void ipv4_set_default_gateway(uint32_t gateway);
