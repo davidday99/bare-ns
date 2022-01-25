@@ -4,13 +4,11 @@
 #include "socket.h"
 #include <string.h>
 
-static uint8_t tx_buf[32];
-
 uint8_t ipv4_tcp_seg[] = {
     0x45,  // version 4, IHL 5 (20 bytes header + 0 bytes options),
     0x01,  // TOS 1 (not sure what typical values are for this field)
     0x00,
-    0x1E,  // Total len, 30 bytes (20 bytes header + 0 bytes options + 10 bytes data)
+    0x28,  // Total len, 40 bytes (20 bytes header + 0 bytes options + 20 bytes data)
     0xAB,
     0XCD,  // ID, 0xABCD
     0x4F,
@@ -43,8 +41,8 @@ uint8_t ipv4_tcp_seg[] = {
     0x02,  // SYN flag
     0xFF,
     0xFF,  // window
-    0xAB,
-    0xCD,  // checksum
+    0xD2,
+    0x30,  // checksum
     0x00,
     0x00,  // urgent pointer (none)
 };
@@ -61,13 +59,13 @@ uint8_t expected[] = {
     0xAB,
     0xCD,
     0xEF,
-    0x11,
-    0x50,
+    0x12,
+    0x60,
     0x12,
     0xFF,
     0xFF,
-    0x00,
-    0x00,
+    0x7C,
+    0xC1,
     0x00,
     0x00
 };
