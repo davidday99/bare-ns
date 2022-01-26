@@ -16,6 +16,7 @@ int test_ipv4_to_udp_to_socket();
 int test_socket_send();
 int test_tcp_checksum();
 int test_tcp_recv_syn();
+int test_tcp_parse_options();
 
 int main() {
     printf("Running tests...\n\n");
@@ -27,6 +28,7 @@ int main() {
     assert(test_socket_send(), 1, "Failed test_socket_send");
     assert(test_tcp_checksum(), 1, "Failed test_tcp_checksum");
     assert(test_tcp_recv_syn(), 1, "Failed test_tcp_recv_syn");
+    assert(test_tcp_parse_options(), 1, "Failed test_tcp_parse_options");
     printf("Done.\n");
     return 0;
 }
