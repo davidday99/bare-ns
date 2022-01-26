@@ -73,7 +73,7 @@ int test_socket_get_listener() {
     return success;
 }
 
-int test_socket_read_udp() {
+int test_socket_recv_udp() {
     int success = 1;
 
     struct socket *s = socket_init(SOCKTYPE_UDP);
@@ -81,7 +81,7 @@ int test_socket_read_udp() {
     s->sockbuf.wrptr = sizeof(socket_udp_data);
     uint8_t data[sizeof(socket_udp_data) - UDP_HEADER_SIZE - IP_METADATA_SIZE];  // subtract UDP and IP headers
     struct socket_addr sockaddr;
-    socket_read(s, &sockaddr, data, 2);
+    socket_recv(s, &sockaddr, data, 2);
 
     success &= memcmp(data, (uint8_t[]) {0xFF, 0xFF}, 2) == 0;
     success &= sockaddr.ip == 0xDEADBEEF;
@@ -106,7 +106,7 @@ int test_socket() {
     success &= test_socket_bind();
     success &= test_socket_close();
     success &= test_socket_get_listener();
-    success &= test_socket_read_udp();
+    success &= test_socket_recv_udp();
     success &= test_socket_write_buffer();
     return success;
 }

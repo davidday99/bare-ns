@@ -49,7 +49,7 @@ int test_ipv4_to_udp_to_socket() {
 
     uint8_t data[2];
     struct socket_addr clientaddr;
-    socket_read(s, &clientaddr, data, 2);
+    socket_recv(s, &clientaddr, data, 2);
 
     success &= clientaddr.ip == 0xC0A8006F;
     success &= clientaddr.port == 0xC0C1;
