@@ -8,70 +8,19 @@
 
 uint16_t socket_write_buffer(struct socket *sock, uint8_t *buf, uint16_t len);
 
-static void tcp_add_option(struct TCB *tcb, enum TCP_OPTIONS option, uint16_t value);
+static void tcp_add_option(struct TCB *tcb, enum TCP_OPTION option, uint16_t value, uint8_t opt_count);
 
-uint32_t tcp_get_isn(void);
+static uint32_t tcp_get_isn(void);
 
-void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr) {
-    struct tcphdr *tx_hdr = (struct tcphdr *) tcb->txbuf.ringbuf;
-    tx_hdr->ctl &= ~0x3F;  // clear all previously set bits
-    tcb->seqnum = tcp_get_isn();
-    tcb->acknum = hton32(hdr->seqnum) + 1;  // add length of any data sent, although it usually won't include data
-    tx_hdr->srcport = hdr->destport;
-    tx_hdr->destport = hdr->srcport;
-    tx_hdr->seqnum = hton32(tcb->seqnum);
-    tx_hdr->acknum = hton32((hton32(hdr->seqnum) + 1));
-    tx_hdr->window = hton16(TCP_WINDOW_SIZE);  // TODO: determine whether this starting value will work
-    tx_hdr->cksm = 0;
-    tx_hdr->urgent = 0;
-    tcb->txbuf.wrptr = sizeof(struct tcphdr);
-    tcb->transmit = 1;
+static void tcp_handle_rst(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr);
+static void tcp_handle_urg(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr);
+static void tcp_handle_ack(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr);
+static void tcp_handle_psh(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr);
+static void tcp_handle_syn(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr);
+static void tcp_handle_fin(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr);
 
-    if (hdr->ctl == SYN) {
-        tcb->state = SYN_RECEIVED;
-        tx_hdr->ctl |= SYN;
-        tx_hdr->ctl |= ACK;
-        tx_hdr->offset = 6;
-        tcp_add_option(tcb, MSS, 1024);
-    } else {
-        tx_hdr->ctl |= RST;
-        tx_hdr->offset = 5;
-    }
-}
+static enum TCP_OPTION tcp_get_option(uint8_t *data, uint8_t **ptr);
 
-void tcp_handle_syn_received_state(struct TCB *tcb, struct tcphdr *hdr) {
-    struct tcphdr *tx_hdr = (struct tcphdr *) tcb->txbuf.ringbuf;
-    tx_hdr->ctl &= ~0x3F;  // clear all previously set bits
-    if (hdr->ctl & ACK) {
-        tcb->state = ESTABLISHED;
-    } else {
-        tcb->state = LISTENING;
-        // send RST message
-    }
-}
-
-void tcp_handle_established_state(struct TCB *tcb, struct tcphdr *hdr, uint8_t *data, struct pseudohdr *phdr) {
-    struct tcphdr *tx_hdr = (struct tcphdr *) tcb->txbuf.ringbuf;
-    tx_hdr->ctl &= ~0x3F;  // clear all previously set bits
-    if (hdr->ctl & PSH) {
-        struct socket_addr sockaddr = {hton32(phdr->srcip), hton16(hdr->destport)};
-        struct socket *s = socket_get_listener(&sockaddr, SOCKTYPE_TCP);
-        uint16_t len = hton16(phdr->len) - hdr->offset*4;
-        socket_write_buffer(s, data, len);
-        tcb->acknum += len;
-        tx_hdr->srcport = hdr->destport;
-        tx_hdr->destport = hdr->srcport;
-        tx_hdr->seqnum = hton32(tcb->seqnum);
-        tx_hdr->acknum = hton32(tcb->acknum);
-        tx_hdr->offset = 5;
-        tx_hdr->ctl |= ACK;
-        tx_hdr->window = hton16(TCP_WINDOW_SIZE);  // TODO: determine whether this starting value will work
-        tx_hdr->cksm = 0;
-        tx_hdr->urgent = 0;
-        tcb->txbuf.wrptr = sizeof(struct tcphdr);
-        tcb->transmit = 1;
-    }
-}
 
 uint16_t calculate_tcp_checksum(uint8_t *tcpdata, uint8_t *pseudo) {
     struct pseudohdr *phdr = (struct pseudohdr *) pseudo;
@@ -83,8 +32,8 @@ uint16_t calculate_tcp_checksum(uint8_t *tcpdata, uint8_t *pseudo) {
 }
 
 
-static void tcp_add_option(struct TCB *tcb, enum TCP_OPTIONS option, uint16_t value) {
-    uint8_t *options = (uint8_t *) &tcb->txbuf.ringbuf[tcb->txbuf.wrptr];
+static void tcp_add_option(struct TCB *tcb, enum TCP_OPTION option, uint16_t value, uint8_t opt_count) {
+    uint8_t *options = (uint8_t *) &tcb->txbuf.ringbuf[TCP_HEADER_LEN + opt_count];
     switch (option) {
         case MSS:
             *options++ = 2;
@@ -96,7 +45,38 @@ static void tcp_add_option(struct TCB *tcb, enum TCP_OPTIONS option, uint16_t va
     }
 }
 
-uint32_t tcp_get_isn(void) {
+void *tcp_parse_options(struct TCB *tcb, uint8_t *data) {
+    uint8_t *ptr = 0;
+    enum TCP_OPTION opt;
+    while ((opt = tcp_get_option(data, &ptr)) != END) {
+        // set variables inside TCB as needed
+        if (opt == NOP) {
+            continue;
+        } else if (opt = MSS) {
+            uint16_t mss = (*(ptr + 2) << 8) | *(ptr + 3);
+        }
+    }
+}
+
+static enum TCP_OPTION tcp_get_option(uint8_t *data, uint8_t **ptr) {
+    if (*ptr == 0) {
+        *ptr = &data[TCP_HEADER_LEN];
+    } else {
+        switch (**ptr) {
+            case END:
+                break;
+            case NOP:
+                *ptr += 1;
+                break;
+            case MSS:
+                *ptr += 4;
+                break;
+        }
+    }
+    return **ptr;
+}
+
+static uint32_t tcp_get_isn(void) {
     return 0;
 }
 
@@ -105,4 +85,156 @@ uint8_t tcp_valid_segment(struct TCB *tcb, uint32_t seqnum) {
         return 1;
     else 
         return 0;
+}
+
+void tcp_handle_control_bits(struct TCB *tcb, uint8_t *data, uint8_t *pseudo) {
+    struct tcphdr *hdr = (struct tcphdr *) data;
+    struct pseudohdr *phdr = (struct pseudohdr *) pseudo;
+
+    if (hdr->ctl & RST) {
+        tcp_handle_rst(tcb, data, phdr);
+    }
+    if (hdr->ctl & URG) {
+        tcp_handle_urg(tcb, data, phdr);
+    }
+    if (hdr->ctl & ACK) {
+        tcp_handle_ack(tcb, data, phdr);
+    }
+    if (hdr->ctl & PSH) {
+        tcp_handle_psh(tcb, data, phdr);
+    }
+    if (hdr->ctl & SYN) {
+        tcp_handle_syn(tcb, data, phdr);
+    }
+    if (hdr->ctl & FIN) {
+        tcp_handle_fin(tcb, data, phdr);
+    }
+}
+
+static void tcp_handle_rst(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
+    tcb->prevstate = tcb->state;
+    tcb->state = CLOSED;
+    return;
+}
+
+static void tcp_handle_urg(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
+    // TODO: implement
+    return;
+}
+
+static void tcp_handle_ack(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
+    struct tcphdr *hdr = (struct tcphdr *) data;
+    if (tcb->state == SYN_RECEIVED) {
+        tcb->prevstate = tcb->state;
+        tcb->state = ESTABLISHED;
+        struct socket_addr sockaddr = {hton32(phdr->srcip), hton16(hdr->destport)};
+        struct socket *s = socket_get_listener(&sockaddr, SOCKTYPE_TCP);
+        s->clientaddr.ip = hton32(phdr->srcip);
+        s->clientaddr.port = hton16(hdr->srcport);
+    }
+    /* clear retransmission buffer of any newly ACK'd data */
+    return;
+}
+
+static void tcp_handle_psh(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
+    struct tcphdr *txhdr = (struct tcphdr *) tcb->txbuf.ringbuf;
+    struct tcphdr *hdr = (struct tcphdr *) data;
+    struct socket_addr sockaddr = {hton32(phdr->srcip), hton16(hdr->destport)};
+    struct socket *s = socket_get_listener(&sockaddr, SOCKTYPE_TCP);
+    uint16_t len = hton16(phdr->len) - hdr->offset*4;
+    socket_write_buffer(s, data, len);
+    tcb->acknum += len;
+    txhdr->ctl |= ACK;
+    
+}
+
+static void tcp_handle_syn(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
+    struct tcphdr *txhdr = (struct tcphdr *) tcb->txbuf.ringbuf;
+    struct tcphdr *hdr = (struct tcphdr *) data;
+    tcb->prevstate = tcb->state;
+    tcb->state = SYN_RECEIVED;
+    tcb->seqnum = tcp_get_isn();
+    tcb->acknum = hton32(hdr->seqnum) + 1;
+    txhdr->ctl |= SYN;
+    txhdr->ctl |= ACK;
+    tcp_add_option(tcb, MSS, 1024, 0);
+    txhdr->offset = 6;
+}
+
+static void tcp_handle_fin(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
+    struct tcphdr *txhdr = (struct tcphdr *) tcb->txbuf.ringbuf;
+    struct tcphdr *hdr = (struct tcphdr *) data;
+    tcb->prevstate = tcb->state;
+    tcb->state = CLOSE_WAIT;
+    txhdr->ctl |= ACK;
+}
+
+uint8_t tcp_valid_control_bits(struct TCB *tcb, struct tcphdr *hdr) {
+    uint8_t valid = 1;
+    switch (tcb->state) {
+        case CLOSED:
+            valid = 0;
+            break;
+        case LISTENING:
+            if (hdr->ctl != SYN)
+                valid = 0;
+            break;
+        case SYN_SENT:
+            if (hdr->ctl != (SYN | ACK)) 
+                valid = 0;
+            break;
+        case SYN_RECEIVED:
+            if (!(hdr->ctl & ACK) || ((hdr->ctl == RST) && tcb->prevstate != LISTENING))
+                valid = 0;
+            break;
+        case ESTABLISHED:
+            break;
+        case FIN_WAIT_1:
+            if (hdr->ctl != FIN && hdr->ctl != ACK)
+                valid = 0;
+            break;
+        case FIN_WAIT_2:
+            if (hdr->ctl != FIN)
+                valid = 0;
+            break;
+        case CLOSE_WAIT:
+            if (hdr->ctl != ACK)
+                valid = 0;
+            break;
+        case CLOSING:
+        case LAST_ACK:
+            if (hdr->ctl != ACK)
+                valid = 0;
+            break;
+        case TIME_WAIT:
+            valid = 0;
+            break;
+        default:
+            valid = 0;
+            break;
+    }
+    return valid;
+}
+
+void tcp_update_header(struct tcphdr *hdr, struct TCB *tcb) {
+    if (hdr->ctl & SYN) {
+        hdr->seqnum = hton32(tcb->seqnum);
+    }
+    if (hdr->ctl & ACK) {
+        hdr->acknum = hton32(tcb->acknum);
+    }
+}
+
+void tcp_set_header_defaults(struct tcphdr *hdr) {
+    if (hdr->offset == 0) {
+        hdr->offset = 5;
+    }
+    if (hdr->window == 0) {
+        hdr->window = hton16(TCP_WINDOW_SIZE);
+    }
+}
+
+void tcp_set_header_ports(struct tcphdr *hdr, uint16_t srcport, uint16_t destport) {
+    hdr->srcport = hton16(srcport);
+    hdr->destport = hton16(destport);
 }

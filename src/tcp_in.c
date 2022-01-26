@@ -4,8 +4,7 @@
 #include "netcommon.h"
 #include "checksum.h"
 #include "ipv4.h"
-
-uint16_t socket_write_buffer(struct socket *sock, uint8_t *buf, uint16_t len);
+#include "string.h"
 
 void tcp_deliver(uint8_t *data, uint8_t *pseudo) {
     // use srcip and destip to verify checksum
@@ -16,33 +15,29 @@ void tcp_deliver(uint8_t *data, uint8_t *pseudo) {
     sockaddr.port = hton16(hdr->destport);
     struct socket *s = socket_get_listener(&sockaddr, SOCKTYPE_TCP);
 
-    if (s == NULL)
+    if (s == NULL) {
         return;
-        // send RST
-
-    if (calculate_tcp_checksum(data, pseudo) != 0 || 
-        !tcp_valid_segment(&s->tcb, hton32(hdr->seqnum)))
-        return;
-    
-    switch (s->tcb.state) {
-        case CLOSED:
-            break;
-        case LISTENING:
-            tcp_handle_listening_state(&s->tcb, hdr);
-            s->clientaddr.ip = sockaddr.ip;
-            s->clientaddr.port = hton16(hdr->srcport);
-            break;
-        case SYN_RECEIVED:
-            tcp_handle_syn_received_state(&s->tcb, hdr);
-            break;
-        case ESTABLISHED:
-            tcp_handle_established_state(&s->tcb, hdr, &data[hdr->offset * 4], phdr);
-        default:
-            break;
     }
 
-    if (s->tcb.transmit) {
-        tcp_send(sockaddr.ip, s->tcb.txbuf.ringbuf, s->tcb.txbuf.wrptr);
-        s->tcb.transmit = 0;
+    if (calculate_tcp_checksum(data, pseudo) != 0 || !tcp_valid_segment(&s->tcb, hton32(hdr->seqnum)))
+        return;
+        
+    struct tcphdr *txhdr = (struct tcphdr *) s->tcb.txbuf.ringbuf;
+    memset((uint8_t *) txhdr, 0, sizeof(struct tcphdr));
+
+    if (!tcp_valid_control_bits(&s->tcb, hdr)) {
+        s->tcb.prevstate = s->tcb.state;
+        s->tcb.state = CLOSED;
+        txhdr->ctl |= RST;
+    } else {
+        tcp_parse_options(&s->tcb, data);
+        tcp_handle_control_bits(&s->tcb, data, pseudo);
+    }
+
+    if (txhdr->ctl != 0) {
+        tcp_update_header(txhdr, &s->tcb);
+        tcp_set_header_defaults(txhdr);
+        tcp_set_header_ports(txhdr, hton16(hdr->destport), hton16(hdr->srcport));
+        tcp_send(sockaddr.ip, s->tcb.txbuf.ringbuf, TCP_HEADER_LEN + s->tcb.txbuf.wrptr);
     }
 }

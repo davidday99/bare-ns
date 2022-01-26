@@ -62,11 +62,15 @@ uint8_t expected[] = {
     0x12,
     0x60,
     0x12,
-    0xFF,
-    0xFF,
-    0x7C,
+    0x04,
+    0x00,
+    0x78,
     0xC1,
     0x00,
+    0x00,
+    0x02,
+    0x04,
+    0x04,
     0x00
 };
 
@@ -82,8 +86,6 @@ int test_tcp_recv_syn() {
 
     ipv4_deliver(ipv4_tcp_seg);
 
-    success &= s->clientaddr.ip = 0xC0A8006F;
-    success &= s->clientaddr.port == 0xC0C1;
     success &= memcmp(s->tcb.txbuf.ringbuf, expected, 20) == 0;
 
     return success;

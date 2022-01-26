@@ -27,7 +27,7 @@ struct tcppseudohdr {
     uint16_t len;
 };
 
-enum TCP_CONTROL_BITS {
+enum TCP_CONTROL_BIT {
     FIN = 1,
     SYN = 2,
     RST = 4,
@@ -36,7 +36,7 @@ enum TCP_CONTROL_BITS {
     URG = 32
 };
 
-enum TCP_OPTIONS {
+enum TCP_OPTION {
     END,
     NOP,
     MSS
@@ -82,6 +82,12 @@ void tcp_handle_syn_received_state(struct TCB *tcb, struct tcphdr *hdr);
 void tcp_handle_established_state(struct TCB *tcb, struct tcphdr *hdr, uint8_t *data, struct pseudohdr *phdr);
 uint16_t calculate_tcp_checksum(uint8_t *tcpdata, uint8_t *pseudo);
 uint8_t tcp_valid_segment(struct TCB *tcb, uint32_t seqnum);
+uint8_t tcp_valid_control_bits(struct TCB *tcb, struct tcphdr *hdr);
+void tcp_handle_control_bits(struct TCB *tcb, uint8_t *data, uint8_t *pseudo);
+void *tcp_parse_options(struct TCB *tcb, uint8_t *data);
+void tcp_update_header(struct tcphdr *hdr, struct TCB *tcb);
+void tcp_set_header_defaults(struct tcphdr *hdr);
+void tcp_set_header_ports(struct tcphdr *hdr, uint16_t srcport, uint16_t destport);
 
 #define TCP_DATA_OFFSET 176
 #define TCP_HEADER_LEN 20
