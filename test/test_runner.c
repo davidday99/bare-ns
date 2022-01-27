@@ -17,6 +17,7 @@ int test_socket_send();
 int test_tcp_checksum();
 int test_tcp_recv_syn();
 int test_tcp_parse_options();
+int test_tcp_socket_send();
 
 int main() {
     printf("Running tests...\n\n");
@@ -29,6 +30,7 @@ int main() {
     assert(test_tcp_checksum(), 1, "Failed test_tcp_checksum");
     assert(test_tcp_recv_syn(), 1, "Failed test_tcp_recv_syn");
     assert(test_tcp_parse_options(), 1, "Failed test_tcp_parse_options");
+    assert(test_tcp_socket_send(), 1, "Failed test_tcp_socket_send");
     printf("Done.\n");
     return 0;
 }

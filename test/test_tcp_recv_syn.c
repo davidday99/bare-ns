@@ -4,7 +4,7 @@
 #include "socket.h"
 #include <string.h>
 
-uint8_t ipv4_tcp_seg[] = {
+static uint8_t ipv4_tcp_seg[] = {
     0x45,  // version 4, IHL 5 (20 bytes header + 0 bytes options),
     0x01,  // TOS 1 (not sure what typical values are for this field)
     0x00,
@@ -47,7 +47,7 @@ uint8_t ipv4_tcp_seg[] = {
     0x00,  // urgent pointer (none)
 };
 
-uint8_t expected[] = {
+static uint8_t expected[] = {
     0x00,
     0x50,
     0xC0,
@@ -80,8 +80,6 @@ int test_tcp_recv_syn() {
 
     struct socket *s = socket_init(SOCKTYPE_TCP);
     socket_bind(s, 80);
-
-    uint8_t data[2];
     s->tcb.state = LISTENING;
 
     ipv4_deliver(ipv4_tcp_seg);
