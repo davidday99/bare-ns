@@ -125,12 +125,13 @@ static void tcp_handle_urg(struct TCB *tcb, uint8_t *data, struct pseudohdr *phd
 static void tcp_handle_ack(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
     struct tcphdr *hdr = (struct tcphdr *) data;
     if (tcb->state == SYN_RECEIVED) {
+        tcb->next += 1;
         tcb->prevstate = tcb->state;
-        tcb->state = ESTABLISHED;
         struct socket_addr sockaddr = {hton32(phdr->srcip), hton16(hdr->destport)};
         struct socket *s = socket_get_listener(&sockaddr, SOCKTYPE_TCP);
         s->clientaddr.ip = hton32(phdr->srcip);
         s->clientaddr.port = hton16(hdr->srcport);
+        tcb->state = ESTABLISHED;
     }
     /* clear retransmission buffer of any newly ACK'd data */
     return;
@@ -142,10 +143,10 @@ static void tcp_handle_psh(struct TCB *tcb, uint8_t *data, struct pseudohdr *phd
     struct socket_addr sockaddr = {hton32(phdr->srcip), hton16(hdr->destport)};
     struct socket *s = socket_get_listener(&sockaddr, SOCKTYPE_TCP);
     uint16_t len = hton16(phdr->len) - hdr->offset*4;
-    socket_write_buffer(s, data, len);
+    socket_write_buffer(s, &data[hdr->offset*4], len);
     tcb->acknum += len;
     txhdr->ctl |= ACK;
-    
+    txhdr->acknum = hton32(tcb->acknum);
 }
 
 static void tcp_handle_syn(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
@@ -154,6 +155,7 @@ static void tcp_handle_syn(struct TCB *tcb, uint8_t *data, struct pseudohdr *phd
     tcb->prevstate = tcb->state;
     tcb->state = SYN_RECEIVED;
     tcb->seqnum = tcp_get_isn();
+    tcb->next = tcb->seqnum + 1;
     tcb->acknum = hton32(hdr->seqnum) + 1;
     txhdr->ctl |= SYN;
     txhdr->ctl |= ACK;
@@ -217,12 +219,8 @@ uint8_t tcp_valid_control_bits(struct TCB *tcb, struct tcphdr *hdr) {
 }
 
 void tcp_update_header(struct tcphdr *hdr, struct TCB *tcb) {
-    if (hdr->ctl & SYN) {
-        hdr->seqnum = hton32(tcb->seqnum);
-    }
-    if (hdr->ctl & ACK) {
-        hdr->acknum = hton32(tcb->acknum);
-    }
+    hdr->seqnum = hton32(tcb->seqnum);
+    hdr->acknum = hton32(tcb->acknum);
 }
 
 void tcp_set_header_defaults(struct tcphdr *hdr) {

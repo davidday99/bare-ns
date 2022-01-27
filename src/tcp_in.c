@@ -19,8 +19,8 @@ void tcp_deliver(uint8_t *data, uint8_t *pseudo) {
         return;
     }
 
-    if (calculate_tcp_checksum(data, pseudo) != 0 || !tcp_valid_segment(&s->tcb, hton32(hdr->seqnum)))
-        return;
+    // if (calculate_tcp_checksum(data, pseudo) != 0) || !tcp_valid_segment(&s->tcb, hton32(hdr->seqnum)))
+    //     return;
         
     struct tcphdr *txhdr = (struct tcphdr *) s->tcb.txbuf.ringbuf;
     memset((uint8_t *) txhdr, 0, sizeof(struct tcphdr));
@@ -30,14 +30,17 @@ void tcp_deliver(uint8_t *data, uint8_t *pseudo) {
         s->tcb.state = CLOSED;
         txhdr->ctl |= RST;
     } else {
-        tcp_parse_options(&s->tcb, data);
+        // tcp_parse_options(&s->tcb, data);
         tcp_handle_control_bits(&s->tcb, data, pseudo);
     }
 
     if (txhdr->ctl != 0) {
-        tcp_update_header(txhdr, &s->tcb);
+        txhdr->seqnum = hton32(s->tcb.seqnum);
+        txhdr->acknum = hton32(s->tcb.acknum);
+        s->tcb.seqnum = s->tcb.next;
         tcp_set_header_defaults(txhdr);
-        tcp_set_header_ports(txhdr, hton16(hdr->destport), hton16(hdr->srcport));
-        tcp_send(sockaddr.ip, s->tcb.txbuf.ringbuf, TCP_HEADER_LEN + s->tcb.txbuf.wrptr);
+        // consider adding src/dest ports as params here
+        tcp_send(hton16(hdr->destport), sockaddr.ip, hton16(hdr->srcport), s->tcb.txbuf.ringbuf, TCP_HEADER_LEN + s->tcb.txbuf.wrptr);
+        s->tcb.txbuf.wrptr = 0;
     }
 }

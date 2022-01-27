@@ -66,8 +66,10 @@ struct TCB {
     enum TCP_STATE state;
     enum TCP_STATE prevstate;
     uint32_t snd_una;
+    uint32_t next;
     uint32_t seqnum;
     uint32_t acknum;
+
     uint16_t window;
     struct tcp_buffer txbuf;
     uint8_t transmit;
@@ -75,7 +77,7 @@ struct TCB {
 
 void tcp_deliver(uint8_t *data, uint8_t *pseudo);
 
-void tcp_send(uint32_t destip, uint8_t *data, uint16_t len);
+void tcp_send(uint16_t srcport, uint32_t destip, uint16_t destport, uint8_t *data, uint16_t len);
 
 void tcp_handle_listening_state(struct TCB *tcb, struct tcphdr *hdr);
 void tcp_handle_syn_received_state(struct TCB *tcb, struct tcphdr *hdr);
