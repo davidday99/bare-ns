@@ -29,6 +29,10 @@ uint16_t calculate_tcp_checksum(uint8_t *tcpdata, uint8_t *pseudo) {
     uint16_t sum2 = ones_complement_sum_buffer(pseudo, sizeof(struct pseudohdr));
 
     uint16_t sum = ones_complement_sum(sum1, sum2);
+    static int x;
+    if (~sum == 0x0c44) {
+        x++;
+    }
     return ~sum;
 }
 
@@ -232,7 +236,7 @@ void tcp_transmit_message(struct TCB *tcb, uint32_t destip, uint16_t destport, u
         txhdr->window = hton16(TCP_WINDOW_SIZE);
     }
 
-    if (len > 0 && len < UINT16_MAX - tcb->txbuf.wrptr)
+    if (len > 0 && len <= UINT16_MAX - tcb->txbuf.wrptr - TCP_HEADER_LEN)
         txhdr->ctl |= PSH;
         memcpy(&tcb->txbuf.ringbuf[tcb->txbuf.wrptr + TCP_HEADER_LEN], data, len);
 
