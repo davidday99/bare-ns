@@ -44,6 +44,7 @@ void socket_accept(struct socket *sock);
 void socket_close(struct socket *sock);
 uint16_t socket_recv(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len);
 void socket_sendto(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len);
+uint16_t socket_send(struct socket *sock, uint8_t *buf, uint16_t len);
 struct socket *socket_get_listener(struct socket_addr *sockaddr, enum SOCKET_TYPE socktype);
 
 #endif /* _SOCKET_H_ */

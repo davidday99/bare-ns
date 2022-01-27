@@ -235,7 +235,7 @@ void tcp_transmit_message(struct TCB *tcb, uint32_t destip, uint16_t destport, u
 
     if (len > 0 && len < UINT16_MAX - tcb->txbuf.wrptr)
         txhdr->ctl |= PSH;
-        memcpy(&tcb->txbuf.ringbuf[tcb->txbuf.wrptr], data, len);
+        memcpy(&tcb->txbuf.ringbuf[tcb->txbuf.wrptr + TCP_HEADER_LEN], data, len);
 
     tcp_send(tcb->srcport, destip, destport, tcb->txbuf.ringbuf, TCP_HEADER_LEN + tcb->txbuf.wrptr + len);
     tcb->txbuf.wrptr = 0;
