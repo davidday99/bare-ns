@@ -105,7 +105,7 @@ uint16_t socket_write_buffer(struct socket *sock, uint8_t *buf, uint16_t len) {
 }
 
 uint16_t socket_send(struct socket *sock, uint8_t *buf, uint16_t len) {
-    if (sock->tcb.state != ESTABLISHED)
+    if (sock->socktype != SOCKTYPE_TCP || sock->tcb.state != ESTABLISHED)
         return 0;
     tcp_transmit_message(&sock->tcb, sock->clientaddr.ip, sock->clientaddr.port, buf, len);
     return len;
