@@ -69,10 +69,10 @@ struct TCB {
     uint32_t next;
     uint32_t seqnum;
     uint32_t acknum;
-
     uint16_t window;
     struct tcp_buffer txbuf;
     uint8_t transmit;
+    uint16_t srcport;
 };
 
 void tcp_deliver(uint8_t *data, uint8_t *pseudo);
@@ -87,9 +87,7 @@ uint8_t tcp_valid_segment(struct TCB *tcb, uint32_t seqnum);
 uint8_t tcp_valid_control_bits(struct TCB *tcb, struct tcphdr *hdr);
 void tcp_handle_control_bits(struct TCB *tcb, uint8_t *data, uint8_t *pseudo);
 void *tcp_parse_options(struct TCB *tcb, uint8_t *data);
-void tcp_update_header(struct tcphdr *hdr, struct TCB *tcb);
-void tcp_set_header_defaults(struct tcphdr *hdr);
-void tcp_set_header_ports(struct tcphdr *hdr, uint16_t srcport, uint16_t destport);
+void tcp_transmit_message(struct TCB *tcb, uint32_t destip, uint16_t destport, uint8_t *data, uint16_t len);
 
 #define TCP_DATA_OFFSET 176
 #define TCP_HEADER_LEN 20

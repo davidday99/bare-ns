@@ -35,12 +35,6 @@ void tcp_deliver(uint8_t *data, uint8_t *pseudo) {
     }
 
     if (txhdr->ctl != 0) {
-        txhdr->seqnum = hton32(s->tcb.seqnum);
-        txhdr->acknum = hton32(s->tcb.acknum);
-        s->tcb.seqnum = s->tcb.next;
-        tcp_set_header_defaults(txhdr);
-        // consider adding src/dest ports as params here
-        tcp_send(hton16(hdr->destport), sockaddr.ip, hton16(hdr->srcport), s->tcb.txbuf.ringbuf, TCP_HEADER_LEN + s->tcb.txbuf.wrptr);
-        s->tcb.txbuf.wrptr = 0;
+        tcp_transmit_message(&s->tcb, hton32(phdr->srcip), hton16(hdr->srcport), 0, 0);
     }
 }

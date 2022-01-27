@@ -3,6 +3,7 @@
 #include "ipv4.h"
 #include "checksum.h"
 #include "socket.h"
+#include "string.h"
 
 #define TCP_WINDOW_SIZE 1024
 
@@ -218,21 +219,24 @@ uint8_t tcp_valid_control_bits(struct TCB *tcb, struct tcphdr *hdr) {
     return valid;
 }
 
-void tcp_update_header(struct tcphdr *hdr, struct TCB *tcb) {
-    hdr->seqnum = hton32(tcb->seqnum);
-    hdr->acknum = hton32(tcb->acknum);
-}
-
-void tcp_set_header_defaults(struct tcphdr *hdr) {
-    if (hdr->offset == 0) {
-        hdr->offset = 5;
+void tcp_transmit_message(struct TCB *tcb, uint32_t destip, uint16_t destport, uint8_t *data, uint16_t len) {
+    struct tcphdr *txhdr = (struct tcphdr *) tcb->txbuf.ringbuf;
+    txhdr->seqnum = hton32(tcb->seqnum);
+    txhdr->acknum = hton32(tcb->acknum);
+    tcb->next += len;
+    tcb->seqnum = tcb->next;
+    
+    if (txhdr->offset == 0) {
+        txhdr->offset = 5;
     }
-    if (hdr->window == 0) {
-        hdr->window = hton16(TCP_WINDOW_SIZE);
+    if (txhdr->window == 0) {
+        txhdr->window = hton16(TCP_WINDOW_SIZE);
     }
-}
 
-void tcp_set_header_ports(struct tcphdr *hdr, uint16_t srcport, uint16_t destport) {
-    hdr->srcport = hton16(srcport);
-    hdr->destport = hton16(destport);
+    if (len > 0 && len < UINT16_MAX - tcb->txbuf.wrptr)
+        txhdr->ctl |= PSH;
+        memcpy(&tcb->txbuf.ringbuf[tcb->txbuf.wrptr], data, len);
+
+    tcp_send(tcb->srcport, destip, destport, tcb->txbuf.ringbuf, TCP_HEADER_LEN + tcb->txbuf.wrptr + len);
+    tcb->txbuf.wrptr = 0;
 }

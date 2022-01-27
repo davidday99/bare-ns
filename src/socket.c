@@ -3,6 +3,7 @@
 #include "socket.h"
 #include "udp.h"
 #include "netcommon.h"
+#include "tcp.h"
 
 struct socket sockets[AVAILABLE_SOCKETS_NUM];
 
@@ -28,6 +29,7 @@ struct socket *socket_init(enum SOCKET_TYPE socktype) {
 
 void socket_bind(struct socket *sock, uint16_t port) {
     sock->srcport = port;
+    sock->tcb.srcport = port;
 }
 
 void socket_connect(struct socket *sock) {
@@ -100,6 +102,13 @@ uint16_t socket_write_buffer(struct socket *sock, uint8_t *buf, uint16_t len) {
         sock->sockbuf.wrptr = (sock->sockbuf.wrptr + 1) % SOCKBUF_LEN;
     }
     return i;
+}
+
+uint16_t socket_send(struct socket *sock, uint8_t *buf, uint16_t len) {
+    if (sock->tcb.state != ESTABLISHED)
+        return 0;
+    tcp_transmit_message(&sock->tcb, sock->clientaddr.ip, sock->clientaddr.port, buf, len);
+    return len;
 }
 
 struct socket *socket_get_listener(struct socket_addr *sockaddr, enum SOCKET_TYPE socktype) {
