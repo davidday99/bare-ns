@@ -126,7 +126,6 @@ static void tcp_handle_urg(struct TCB *tcb, uint8_t *data, struct pseudohdr *phd
 static void tcp_handle_ack(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
     struct tcphdr *hdr = (struct tcphdr *) data;
     if (tcb->state == SYN_RECEIVED) {
-        tcb->next += 1;
         tcb->prevstate = tcb->state;
         struct socket_addr sockaddr = {hton32(phdr->srcip), hton16(hdr->destport)};
         struct socket *s = socket_get_listener(&sockaddr, SOCKTYPE_TCP);
