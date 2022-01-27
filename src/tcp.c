@@ -226,6 +226,7 @@ void tcp_transmit_message(struct TCB *tcb, uint32_t destip, uint16_t destport, u
     struct tcphdr *txhdr = (struct tcphdr *) tcb->txbuf.ringbuf;
     txhdr->seqnum = hton32(tcb->seqnum);
     txhdr->acknum = hton32(tcb->acknum);
+    txhdr->cksm = 0;
     tcb->next += len;
     tcb->seqnum = tcb->next;
     
