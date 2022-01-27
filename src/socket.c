@@ -72,8 +72,11 @@ uint16_t socket_recv(struct socket *sock, struct socket_addr *sockaddr, uint8_t 
 }
 
 uint16_t socket_read(struct socket *sock, uint8_t *buf, uint16_t len) {
-    while (sock->sockbuf.rdptr == sock->sockbuf.wrptr)
-        ;
+    while (sock->sockbuf.rdptr == sock->sockbuf.wrptr) {
+        if (sock->tcb.state == CLOSED) {
+            return 0;
+        }
+    }
     uint16_t i = 0;
     while (i < len && sock->sockbuf.rdptr != sock->sockbuf.wrptr) {
         buf[i++] = sock->sockbuf.ringbuf[sock->sockbuf.rdptr];
@@ -118,7 +121,7 @@ static struct socket *socket_get_udp_listener(struct socket_addr *sockaddr) {
 
 static struct socket *socket_get_tcp_listener(struct socket_addr *sockaddr) {
      for (uint8_t i = 0; i < AVAILABLE_SOCKETS_NUM; i++) {
-        if (sockets[i].srcport == sockaddr->port && (sockets[i].tcb.state == LISTENING ||
+        if (sockets[i].srcport == sockaddr->port && (sockets[i].tcb.state < ESTABLISHED ||
             (sockets[i].tcb.state != CLOSED && sockets[i].clientaddr.ip == sockaddr->ip)))
             return &sockets[i];
     }
