@@ -7,7 +7,8 @@ OBJ = obj
 EOBJ = eobj
 ODIR = build
 
-SRCS = $(wildcard $(SRC)/*.c)
+SRCS = $(wildcard $(SRC)/*.c) \
+		$(wildcard $(SRC)/*/*.c)
 TESTS = $(wildcard $(TEST)/*.c)
 OBJS = $(addprefix $(OBJ)/, $(notdir $(SRCS:.c=.o)))
 EOBJS = $(addprefix $(EOBJ)/, $(notdir $(SRCS:.c=.o)))
@@ -16,7 +17,7 @@ TEST_OBJS = $(addprefix $(OBJ)/, $(notdir $(TESTS:.c=.o)))
 CC = gcc
 DEBUGGER = gdb
 RM      = rm -rf
-MKDIR   = @mkdir -p $(@D) #creates folders if not present
+MKDIR   = @mkdir -p $(@D)
 CFLAGS = -I$(INC) -g3
 
 OPT += -O0
@@ -27,6 +28,8 @@ XCFLAGS += $(OPT)
 
 XCC = arm-none-eabi-gcc
 
+$(info $(OBJS))
+
 all: $(ODIR)/$(PROJECT).bin
 
 test: $(ODIR)/$(TEST)/test_runner
@@ -34,6 +37,10 @@ test: $(ODIR)/$(TEST)/test_runner
 embedded: $(EOBJS)
 
 $(OBJ)/%.o: $(SRC)/%.c
+	$(MKDIR)   
+	$(CC) -o $@ $^ -c $(CFLAGS)
+
+$(OBJ)/%.o: $(SRC)/**/%.c
 	$(MKDIR)   
 	$(CC) -o $@ $^ -c $(CFLAGS)
 	
@@ -50,6 +57,10 @@ $(ODIR)/$(TEST)/test_runner: $(TEST_OBJS) $(filter-out $(OBJ)/main.o, $(OBJS))
 	$(CC) -o $@ $^ $(CFLAGS)
 
 $(EOBJ)/%.o: $(SRC)/%.c
+	$(MKDIR)  
+	$(XCC) -o $@ $^ -c $(XCFLAGS) -I$(INC)
+
+$(EOBJ)/%.o: $(SRC)/*/%.c
 	$(MKDIR)  
 	$(XCC) -o $@ $^ -c $(XCFLAGS) -I$(INC)
 
