@@ -1,4 +1,3 @@
-PROJECT = main
 SRC = src
 INC = inc
 TEST = test
@@ -28,33 +27,9 @@ XCFLAGS += $(OPT)
 
 XCC = arm-none-eabi-gcc
 
-$(info $(OBJS))
-
-all: $(ODIR)/$(PROJECT).bin
-
-test: $(ODIR)/$(TEST)/test_runner
-
 embedded: $(EOBJS)
 
-$(OBJ)/%.o: $(SRC)/%.c
-	$(MKDIR)   
-	$(CC) -o $@ $^ -c $(CFLAGS)
-
-$(OBJ)/%.o: $(SRC)/**/%.c
-	$(MKDIR)   
-	$(CC) -o $@ $^ -c $(CFLAGS)
-	
-$(ODIR)/$(PROJECT).bin: $(OBJS)
-	$(MKDIR)           
-	$(CC) -o $@ $^ $(CFLAGS)
-
-$(OBJ)/%.o: $(TEST)/%.c
-	$(MKDIR)
-	$(CC) -o $@ $^ -c $(CFLAGS) -I$(TEST_INC) -I$(INC)
-
-$(ODIR)/$(TEST)/test_runner: $(TEST_OBJS) $(filter-out $(OBJ)/main.o, $(OBJS))
-	$(MKDIR)
-	$(CC) -o $@ $^ $(CFLAGS)
+test: $(ODIR)/$(TEST)/test_runner
 
 $(EOBJ)/%.o: $(SRC)/%.c
 	$(MKDIR)  
@@ -64,13 +39,28 @@ $(EOBJ)/%.o: $(SRC)/*/%.c
 	$(MKDIR)  
 	$(XCC) -o $@ $^ -c $(XCFLAGS) -I$(INC)
 
-debug:
-	$(DEBUGGER) --tui $(ODIR)/$(PROJECT).bin
+$(OBJ)/%.o: $(SRC)/%.c
+	$(MKDIR)   
+	$(CC) -o $@ $^ -c $(CFLAGS)
 
-#remove object and bin files
+$(OBJ)/%.o: $(SRC)/**/%.c
+	$(MKDIR)   
+	$(CC) -o $@ $^ -c $(CFLAGS)
+
+$(OBJ)/%.o: $(TEST)/%.c
+	$(MKDIR)
+	$(CC) -o $@ $^ -c $(CFLAGS) -I$(TEST_INC) -I$(INC)
+
+$(ODIR)/$(TEST)/test_runner: $(TEST_OBJS) $(filter-out $(OBJ)/main.o, $(OBJS))
+	$(MKDIR)
+	$(CC) -o $@ $^ $(CFLAGS)
+
+debug:
+	$(DEBUGGER) --tui $(ODIR)/$(TEST)/test_runner
+
 clean:
 	-$(RM) $(OBJ)
 	-$(RM) $(ODIR)
 	-$(RM) $(EOBJ)
 
-.PHONY: all clean
+.PHONY: clean
