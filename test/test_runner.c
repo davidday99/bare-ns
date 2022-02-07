@@ -18,6 +18,8 @@ int test_tcp_checksum();
 int test_tcp_recv_syn();
 int test_tcp_parse_options();
 int test_tcp_socket_send();
+int test_http_request_parsing();
+int test_http_response_forming();
 
 int main() {
     printf("Running tests...\n\n");
@@ -31,6 +33,8 @@ int main() {
     assert(test_tcp_recv_syn(), 1, "Failed test_tcp_recv_syn");
     assert(test_tcp_parse_options(), 1, "Failed test_tcp_parse_options");
     assert(test_tcp_socket_send(), 1, "Failed test_tcp_socket_send");
+    assert(test_http_request_parsing(), 1, "Failed test_http_request_parsing");
+    assert(test_http_response_forming(), 1, "Failed test_http_response_forming");
     printf("Done.\n");
     return 0;
 }
