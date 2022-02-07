@@ -29,10 +29,7 @@ uint16_t calculate_tcp_checksum(uint8_t *tcpdata, uint8_t *pseudo) {
     uint16_t sum2 = ones_complement_sum_buffer(pseudo, sizeof(struct pseudohdr));
 
     uint16_t sum = ones_complement_sum(sum1, sum2);
-    static int x;
-    if (~sum == 0x0c44) {
-        x++;
-    }
+
     return ~sum;
 }
 
