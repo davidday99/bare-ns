@@ -15,6 +15,7 @@ int test_tcp_socket_send() {
     s->clientaddr.port = 0xC0C1;
 
     socket_send(s, data, 2);
+    socket_close(s);
 
     success &= memcmp(&s->tcb.txbuf.ringbuf[TCP_HEADER_LEN], data, sizeof(data)) == 0;
 

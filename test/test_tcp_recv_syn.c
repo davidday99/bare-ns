@@ -83,6 +83,7 @@ int test_tcp_recv_syn() {
     s->tcb.state = LISTENING;
 
     ipv4_deliver(ipv4_tcp_seg);
+    socket_close(s);
 
     success &= memcmp(s->tcb.txbuf.ringbuf, expected, 20) == 0;
 

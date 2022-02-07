@@ -52,6 +52,7 @@ int test_socket_send() {
     uint8_t data[4] = {0xDE, 0xAD, 0xBE, 0xEF};
 
     socket_sendto(s, &receiver_addr, data, 4);
+    socket_close(s);
 
     success &= memcmp(expected, tx_buf, 32) == 0;
     
