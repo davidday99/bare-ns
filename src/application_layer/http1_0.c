@@ -12,6 +12,7 @@ static uint8_t *parse_version(uint8_t *buf, struct http_request_message *req);
 static uint8_t *set_status_line(uint8_t *buf, struct http_response_message *res);
 static uint8_t *set_response_headers(uint8_t *buf, char *location);
 static uint8_t *set_entity_headers(uint8_t *buf, struct http_response_message *res);
+static uint8_t *delimit_headers(uint8_t *buf);
 static uint8_t *append_entity_body(uint8_t *buf, char *body);
 const char *get_reason_phrase(http_status_code status_code);
 
@@ -43,6 +44,8 @@ void http_respond(struct socket *s, http_status_code status_code, char *location
 
     // set entity headers
     bufptr = set_entity_headers(bufptr, &res);
+
+    bufptr = delimit_headers(bufptr);
 
     // append entity body, if any
     if (body != 0)
@@ -88,8 +91,14 @@ static uint8_t *set_response_headers(uint8_t *buf, char *location) {
 }
 
 static uint8_t *set_entity_headers(uint8_t *buf, struct http_response_message *res) {
-    uint16_t body_len = strlen(res->body);
+    uint16_t body_len;
     char len_string[6];
+
+    if (res->body != 0)
+        body_len = strlen(res->body);
+    else
+        body_len = 0;
+
     itos(body_len, len_string);
 
     memcpy(buf, "Content-Type: text/html\r\n", 25);
@@ -103,10 +112,14 @@ static uint8_t *set_entity_headers(uint8_t *buf, struct http_response_message *r
     return buf;
 }
 
-static uint8_t *append_entity_body(uint8_t *buf, char *body) {
-    uint16_t body_len = strlen(body);
+static uint8_t *delimit_headers(uint8_t *buf) {
     *buf++ = '\r';
     *buf++ = '\n';
+    return buf;
+}
+
+static uint8_t *append_entity_body(uint8_t *buf, char *body) {
+    uint16_t body_len = strlen(body);
     memcpy(buf, body, body_len);
     buf += body_len;
     return buf;
@@ -192,4 +205,8 @@ static uint8_t *parse_version(uint8_t *buf, struct http_request_message *req) {
 const char *get_reason_phrase(http_status_code status_code) {
     if (status_code == 200)
         return "OK";
+    if (status_code == 202)
+        return "ACCEPTED";
+    if (status_code == 204)
+        return "NO CONTENT";
 }
