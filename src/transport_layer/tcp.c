@@ -114,8 +114,11 @@ void tcp_handle_control_bits(struct TCB *tcb, uint8_t *data, uint8_t *pseudo) {
 }
 
 static void tcp_handle_rst(struct TCB *tcb, uint8_t *data, struct pseudohdr *phdr) {
+    if (tcb->prevstate == LISTENING)
+        tcb->state = LISTENING;
+    else
+        tcb->state = CLOSED;
     tcb->prevstate = tcb->state;
-    tcb->state = CLOSED;
     return;
 }
 
