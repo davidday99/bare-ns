@@ -34,14 +34,14 @@ uint32_t ipv4_get_subnet_mask(void) {
     return ipv4_subnet_mask;
 }
 
-uint8_t ipv4_options_len(struct ipv4hdr *hdr) {
-    uint8_t len = hdr->ihl - (IPV4_MIN_HEADER_LEN / 4);
+uint16_t ipv4_options_len(struct ipv4hdr *hdr) {
+    uint16_t len = hdr->ihl - (IPV4_MIN_HEADER_LEN / 4);
     len *= 4;  // convert from 32-bit fields to bytes
     return len;
 }
 
-uint8_t ipv4_data_len(struct ipv4hdr *hdr) {
-    uint8_t header_len = hdr->ihl * 4;  // convert from 32-bit fields to bytes
+uint16_t ipv4_data_len(struct ipv4hdr *hdr) {
+    uint16_t header_len = hdr->ihl * 4;  // convert from 32-bit fields to bytes
     uint16_t total_len = hton16(hdr->len);
     return total_len - header_len;
 }
