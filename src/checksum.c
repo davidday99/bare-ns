@@ -10,7 +10,7 @@ uint16_t ones_complement_sum_buffer(uint8_t *data, uint16_t len) {
     }
     
     if (len & 1) {
-        sum += (*ptr_two_bytes & 0xFF) << 8;
+        sum += (*ptr_two_bytes & 0xFF);
     }
     
     while ((overflow = (sum & 0xFFFF0000))) {
