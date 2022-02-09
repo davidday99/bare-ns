@@ -87,6 +87,7 @@ uint8_t tcp_valid_segment(struct TCB *tcb, uint32_t seqnum);
 uint8_t tcp_valid_control_bits(struct TCB *tcb, struct tcphdr *hdr);
 void tcp_handle_control_bits(struct TCB *tcb, uint8_t *data, uint8_t *pseudo);
 void *tcp_parse_options(struct TCB *tcb, uint8_t *data);
+void tcp_send_fin(struct TCB *tcb, uint32_t destip, uint16_t destport);
 void tcp_transmit_message(struct TCB *tcb, uint32_t destip, uint16_t destport, uint8_t *data, uint16_t len);
 
 #define TCP_DATA_OFFSET 176

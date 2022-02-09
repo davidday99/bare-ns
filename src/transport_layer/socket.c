@@ -7,6 +7,7 @@
 
 struct socket sockets[AVAILABLE_SOCKETS_NUM];
 
+static void socket_close_tcp(struct socket *sock);
 static struct socket *socket_get_udp_listener(struct socket_addr *sockaddr);
 static struct socket *socket_get_tcp_listener(struct socket_addr *sockaddr);
 
@@ -43,7 +44,22 @@ void socket_accept(struct socket *sock) {
 }
 
 void socket_close(struct socket *sock) {
-    sock->open = SOCKET_NOT_OPEN;
+
+    if (sock->socktype == SOCKTYPE_UDP) {
+        sock->open = SOCKET_NOT_OPEN;
+    } else if (sock->socktype == SOCKTYPE_TCP) {
+        socket_close_tcp(sock);
+    }
+}
+
+static void socket_close_tcp(struct socket *sock) {
+    sock->tcb.prevstate = sock->tcb.state;
+    if (sock->tcb.state == ESTABLISHED) {
+        sock->tcb.state = FIN_WAIT_1;
+    } else if (sock->tcb.state == CLOSE_WAIT) {
+        sock->tcb.state = LAST_ACK;
+    }
+    tcp_send_fin(&sock->tcb, sock->clientaddr.ip, sock->clientaddr.port);
 }
 
 uint16_t socket_recv(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len) {

@@ -19,8 +19,8 @@ void tcp_deliver(uint8_t *data, uint8_t *pseudo) {
         return;
     }
 
-    // if (calculate_tcp_checksum(data, pseudo) != 0) || !tcp_valid_segment(&s->tcb, hton32(hdr->seqnum)))
-    //     return;
+    if ((calculate_tcp_checksum(data, pseudo) != 0) || !tcp_valid_segment(&s->tcb, hton32(hdr->seqnum)))
+        return;
         
     struct tcphdr *txhdr = (struct tcphdr *) s->tcb.txbuf.ringbuf;
     memset((uint8_t *) txhdr, 0, sizeof(struct tcphdr));
