@@ -175,18 +175,20 @@ static void tcp_handle_fin(struct TCB *tcb, uint8_t *data, struct pseudohdr *phd
     struct tcphdr *txhdr = (struct tcphdr *) tcb->txbuf.ringbuf;
     struct tcphdr *hdr = (struct tcphdr *) data;
     tcb->prevstate = tcb->state;
-    if (tcb->state == ESTABLISHED)
+    if (tcb->state == ESTABLISHED || tcb->state == FIN_WAIT_1 || tcb->state == FIN_WAIT_2) {
         tcb->state = CLOSE_WAIT;
+        txhdr->ctl |= ACK;
+    }
     else 
         tcb->state = CLOSED;
-    txhdr->ctl |= ACK;
 }
 
 uint8_t tcp_valid_control_bits(struct TCB *tcb, struct tcphdr *hdr) {
     uint8_t valid = 1;
     switch (tcb->state) {
         case CLOSED:
-            valid = 0;
+            if (hdr->ctl != FIN && hdr->ctl != ACK && hdr->ctl != (FIN | ACK))
+                valid = 0;
             break;
         case LISTENING:
             if (hdr->ctl != SYN)
@@ -203,15 +205,12 @@ uint8_t tcp_valid_control_bits(struct TCB *tcb, struct tcphdr *hdr) {
         case ESTABLISHED:
             break;
         case FIN_WAIT_1:
-            if (hdr->ctl != FIN && hdr->ctl != ACK)
-                valid = 0;
-            break;
         case FIN_WAIT_2:
-            if (hdr->ctl != FIN)
+            if (hdr->ctl != FIN && hdr->ctl != ACK && hdr->ctl != (FIN | ACK))
                 valid = 0;
             break;
         case CLOSE_WAIT:
-            if (hdr->ctl != ACK)
+            if (hdr->ctl != ACK && hdr->ctl != FIN && hdr->ctl != (FIN | ACK))
                 valid = 0;
             break;
         case CLOSING:
@@ -233,6 +232,7 @@ void tcp_send_fin(struct TCB *tcb, uint32_t destip, uint16_t destport) {
     struct tcphdr *txhdr = (struct tcphdr *) tcb->txbuf.ringbuf;
     txhdr->seqnum = hton32(tcb->seqnum);
     txhdr->acknum = hton32(tcb->acknum);
+    txhdr->ctl &= ~0x3F;
     txhdr->ctl |= FIN;
     txhdr->cksm = 0;
     
