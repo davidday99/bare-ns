@@ -8,3 +8,9 @@ __attribute__ ((weak)) void net_rx(uint8_t *buf) {
     return;
 }
 
+__attribute__ ((weak)) void net_mac_address(uint8_t *buf) {
+    return;
+}
+
+
+
