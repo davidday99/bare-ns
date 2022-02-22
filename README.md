@@ -6,7 +6,7 @@
 
 ## Overview
 
-BNS is a simple network stack intended for baremetal targets. It requires some memory and string related standard library functions such as *memcpy* and *strlen*, but aside from that it is self-contained. An upshot of this is that it doesn't use a heap. The requires that many features such as frame and packet size be upper-bounded to avoid buffer overflows. 
+Bare-NS is a simple network stack intended for baremetal targets. It requires some memory and string related standard library functions such as *memcpy* and *strlen*, but aside from that it is self-contained. An upshot of this is that it doesn't use a heap. This requires that many features such as frame and packet size be upper-bounded to avoid buffer overflows. 
 
 Currently the stack supports the following protocols:
 
