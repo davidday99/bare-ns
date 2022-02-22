@@ -40,7 +40,7 @@ struct socket {
 
 struct socket *socket_init(enum SOCKET_TYPE socktype);
 void socket_bind(struct socket *sock, uint16_t port);
-void socket_accept(struct socket *sock);
+uint8_t socket_accept(struct socket *sock);
 void socket_close(struct socket *sock);
 uint16_t socket_recv(struct socket *sock, struct socket_addr *sockaddr, uint8_t *buf, uint16_t len);
 uint16_t socket_read(struct socket *sock, uint8_t *buf, uint16_t len);

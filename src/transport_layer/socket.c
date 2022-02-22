@@ -37,10 +37,13 @@ void socket_connect(struct socket *sock) {
     return;  // TODO: implement
 }
 
-void socket_accept(struct socket *sock) {
+uint8_t socket_accept(struct socket *sock) {
     sock->tcb.state = LISTENING;
-    while (sock->tcb.state != ESTABLISHED)
-        ;
+    while (sock->tcb.state != ESTABLISHED) {
+        if (sock->tcb.state == CLOSED)
+            return 0;
+    }
+    return 1;
 }
 
 void socket_close(struct socket *sock) {
