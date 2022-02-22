@@ -6,8 +6,6 @@
 #include "netcommon.h"
 #include <string.h>
 
-static uint8_t MAC[] = {0xA0, 0xCD, 0xEF, 0x01, 0x23, 0x45};
-
 void arp_send_request(uint8_t *hwsender, uint32_t psender,
                 uint8_t *hwtarget, uint32_t ptarget) {
     uint8_t arppkt[ARP_SIZE];
@@ -38,12 +36,4 @@ void arp_send_reply(uint8_t *hwsender, uint32_t psender,
     memcpy(reply->hwsender, hwsender, 6);
     memcpy(reply->hwtarget, hwtarget, 6);
     net_tx(reply->hwtarget, arppkt, sizeof(arppkt), ETHERTYPE_ARP);
-}
-
-void arp_deliver(uint8_t *buf) {
-    struct arphdr *hdr = (struct arphdr *) buf;
-    if (hton32(hdr->ptarget) != ipv4_get_address())
-        return;
-    if (hton16(hdr->opcode) == ARP_OP_REQUEST)
-        arp_send_reply(MAC, ipv4_get_address(), hdr->hwsender, hdr->psender);
 }
