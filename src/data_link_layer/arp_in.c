@@ -13,5 +13,5 @@ void arp_deliver(uint8_t *buf) {
     if (hton32(hdr->ptarget) != ipv4_get_address())
         return;
     if (hton16(hdr->opcode) == ARP_OP_REQUEST)
-        arp_send_reply(MAC, ipv4_get_address(), hdr->hwsender, hdr->psender);
+        arp_send_reply(MAC, ipv4_get_address(), hdr->hwsender, hton32(hdr->psender));
 }
