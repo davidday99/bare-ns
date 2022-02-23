@@ -19,7 +19,7 @@ RM      = rm -rf
 MKDIR   = @mkdir -p $(@D)
 CFLAGS = -I$(INC) -g3
 
-OPT += -O0
+OPT += -O3
 
 XCFLAGS = -ggdb3 -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 
 XCFLAGS += -mfloat-abi=softfp -MD -std=c99 -c -Wextra -Wall -Wno-missing-braces -Wno-builtin-declaration-mismatch

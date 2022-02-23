@@ -5,6 +5,8 @@
 #include "netcommon.h"
 #include "tcp.h"
 
+#pragma GCC optimize ("O0")
+
 struct socket sockets[AVAILABLE_SOCKETS_NUM];
 
 static void socket_close_tcp(struct socket *sock);

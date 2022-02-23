@@ -5,6 +5,8 @@
 #include "udp.h"
 #include "netcommon.h"
 
+#pragma GCC optimize ("O0")
+
 void ipv4_deliver(uint8_t *buf) {
     struct ipv4hdr *hdr = (struct ipv4hdr *) buf;
     uint8_t options_len = ipv4_options_len(hdr);
