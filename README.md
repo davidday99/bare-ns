@@ -3,6 +3,7 @@
 - [Overview](#overview)
 - [Limitations](#limitations)
 - [Architecture](#architecture)
+- [Todo](#todo)
 
 ## Overview
 
@@ -44,9 +45,9 @@ Each protocol implementation is typically split into 1-3 sources:
 2. `<protocol name>_out.c`
 3. `<protocol name>.c`
 
-With this kind of separation, modules for protocols that encapsulate or are encapsulated by other protocols form two separate dependency chains--a chain of modules that implement receipt of data and a chain of modules that implement sending of data-- rather than a single chain full of circular dependencies. The first file contains the implementation of `deliver`, while the second contains the implementation of `send`. The third is included as needed to implement more complex behavior or to share logic across the first two sources.
+The first file contains the implementation of `deliver`, while the second contains the implementation of `send`. The third is included as needed to implement more complex behavior or to share logic across the first two sources. This may not be the most effective organization, but it keeps receive logic and transmission logic mostly separate and mitigates the risk creating circular dependencies.
 
-Received data propogates up the stack through subsequent `deliver` function calls until it reaches its destination. Application layer users can access delivered data using the familiar socket interface.
+Received data propogates up the stack through subsequent `deliver` function calls until it reaches its destination. Applications can access delivered data using the familiar socket interface.
 
 To integrate this network stack into a system, implement the functions in `net_interface.c` to interact with an NIC.
 
@@ -57,5 +58,12 @@ To integrate this network stack into a system, implement the functions in `net_i
 - `net_mac_address` should return the NIC's MAC address.
 
 
+## Todo
+
+There are plenty of improvements and additions to be made. To name just a few off the top of my head:
+
+- refactor TCP module, particularly with retransmission support.
+- implement ICMP.
+- add support for raw socket type.
 
 
