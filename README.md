@@ -1,4 +1,4 @@
-# Bare-NS, a bare network stack.
+# Bare-NS: a bare, bare-metal network stack.
 
 - [Overview](#overview)
 - [Limitations](#limitations)
