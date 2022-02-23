@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "ipv4.h"
+#include "arp.h"
 #include "netcommon.h"
 
 uint8_t itos(uint32_t val, char *buf);
@@ -20,6 +21,7 @@ uint32_t ipv4_get_address(void) {
 
 void ipv4_set_default_gateway(uint32_t gateway) {
     ipv4_default_gateway = gateway;
+    arp_send_request(ipv4_get_address(), gateway);
 }
 
 uint32_t ipv4_get_default_gateway(void) {
