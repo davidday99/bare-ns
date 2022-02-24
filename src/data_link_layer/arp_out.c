@@ -19,7 +19,7 @@ void arp_send_request(uint32_t psender, uint32_t ptarget) {
     request->psender = hton32(psender);
     request->ptarget = hton32(ptarget);
     memcpy(request->hwsender, mac, 6);
-    memset(request->hwtarget, 0, 6);
+    memcpy(request->hwtarget, MAC_BROADCAST, 6);
     net_tx(MAC_BROADCAST, arppkt, sizeof(arppkt), ETHERTYPE_ARP);
 }
 
