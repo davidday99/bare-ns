@@ -19,7 +19,13 @@ enum http_method {
     GET,
     HEAD,
     POST,
-    UPDATE
+    UPDATE,
+    NOT_IMPLEMENTED
+};
+
+enum http_request_format {
+    GOOD_REQUEST,
+    BAD_REQUEST
 };
 
 
@@ -60,6 +66,7 @@ struct http_request_message {
     enum http_method method;
     char *uri;
     char *body;
+    enum http_request_format bad_request;
 };
 
 struct http_response_message {

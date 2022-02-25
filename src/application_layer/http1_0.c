@@ -3,6 +3,7 @@
 #include "string.h"
 
 #define DELIMITER "\r\n"
+#define MAX_LWS 1024
 
 static uint8_t *parse_request_line(uint8_t *buf, struct http_request_message *req);
 static uint8_t *parse_request_method(uint8_t *buf, struct http_request_message *req);
@@ -133,29 +134,51 @@ uint8_t http_parse_request(uint8_t *buf, struct http_request_message *req) {
     // parse request headers
     // parse entity headers
 
+    if (bufptr == 0) {
+        req->bad_request = BAD_REQUEST;
+        return 0;
+    }
+    req->bad_request = GOOD_REQUEST;
     return 1;  // return 1 if valid request, else return 0
 }
 
 static uint8_t *parse_request_line(uint8_t *buf, struct http_request_message *req) {
     uint8_t *bufptr = buf;
     bufptr = parse_request_method(bufptr, req);
+    if (bufptr == 0) {
+        return 0;
+    }
     bufptr = parse_request_uri(bufptr, req);
+    if (bufptr == 0) {
+        return 0;
+    }
     bufptr = parse_version(bufptr, req);
+    if (bufptr == 0) {
+        return 0;
+    }
 
-    while (memcmp(bufptr, DELIMITER, 2) != 0)
+    uint16_t message_size = 0;
+    while (memcmp(bufptr, DELIMITER, 2) != 0) {
+        if (message_size++ > MAX_LWS) {
+            return 0;
+        }
         bufptr++;
-
+    }
+        
     return bufptr;
 }
 
 static uint8_t *parse_request_method(uint8_t *buf, struct http_request_message *req) {
-    char method[5];
+    char method[7];
     uint8_t i = 0;
 
-    while (*buf == ' ' && *buf == '\t') {
+    while (*buf == ' ' || *buf == '\t') {
         *buf++;
     }
     while (*buf != ' ' && *buf != '\t') {
+        if (i > 6) {
+            return 0;
+        }
         method[i++] = *buf++;
     }
     *buf++ = '\0';
@@ -169,17 +192,23 @@ static uint8_t *parse_request_method(uint8_t *buf, struct http_request_message *
         req->method = POST;
     } else if (strcmp(method, "UPDATE") == 0) {
         req->method = UPDATE;
+    } else {
+        req->method = NOT_IMPLEMENTED;
     }
 
     return buf;
 }
 
 static uint8_t *parse_request_uri(uint8_t *buf, struct http_request_message *req) {
-    while (*buf == ' ' && *buf == '\t') {
+    uint16_t uri_len = 0;
+    while (*buf == ' ' || *buf == '\t') {
         *buf++;
     }
-    req->uri = buf;
+    req->uri = (char *) buf;
     while (*buf != ' ' && *buf != '\t') {
+        if (uri_len++ > MAX_URI_LEN) {
+            return 0;
+        }
         *buf++;
     }
     *buf++ = '\0';
@@ -188,16 +217,23 @@ static uint8_t *parse_request_uri(uint8_t *buf, struct http_request_message *req
 }
 
 static uint8_t *parse_version(uint8_t *buf, struct http_request_message *req) {
-    while (*buf == ' ' && *buf == '\t') {
+    while (*buf == ' ' || *buf == '\t') {
         *buf++;
     }
+    
+    if (memcmp(buf, "HTTP/", 5) != 0) {
+        return 0;
+    }
 
-    while (*buf++ != '/')
-        ;
+    buf += 5;
 
     req->version[0] = *buf;
     buf += 2;  // skip the decimal
     req->version[1] = *buf++;
+
+    if (req->version[0] != '1' || (req->version[1] != '0' && req->version[1] != '1')) {
+        return 0;
+    }
 
     return buf;
 }
