@@ -65,6 +65,7 @@ There are plenty of improvements and additions to be made. To name just a few of
 - refactor TCP module, particularly with retransmission support.
 - implement ICMP.
 - implement DHCP.
+- implement DNS resolver.
 - add support for raw socket type.
 
 
